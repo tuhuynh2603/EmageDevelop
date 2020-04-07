@@ -22,11 +22,11 @@
 <c></c>
 <c></c>
 <l>Dilate_Width := 1</l>
-<l>Dilate_Height := 5</l>
-<l>Opening_Rect_Width := 30</l>
+<l>Dilate_Height := 1</l>
+<l>Opening_Rect_Width := 1</l>
 <l>Opening_Rect_Height := 1</l>
 <c></c>
-<l>Smooth_Value_Crop := 75</l>
+<l>Smooth_Value_Crop := 20</l>
 <l>Shape_Width := 500</l>
 <l>Opening_Circle := 20</l>
 <l>Opening_Circle_Crop :=40</l>
@@ -39,8 +39,8 @@
 <l>Thresh_White_bot := 220</l>
 <c></c>
 <l>Dilate_Width_bot := 1</l>
-<l>Dilate_Height_bot := 5</l>
-<l>Opening_Rect_Width_bot := 30</l>
+<l>Dilate_Height_bot := 1</l>
+<l>Opening_Rect_Width_bot := 1</l>
 <l>Opening_Rect_Height_bot := 1</l>
 <c></c>
 <l>Smooth_Value_Crop_bot := 75</l>
@@ -96,7 +96,7 @@
 <c>    </c>
 <l>        if (i = first_file)   </l>
 <l>            gen_rectangle1 (SmoothBL_ROI, 156.611, 628.721, 288.259, 1561.39)</l>
-<l>            gen_rectangle1 (Encap_ROI, 240.907, 243.05, 509.497, 1855.11)</l>
+<l>            gen_rectangle1 (Encap_ROI, 240.907, 243.05, 509.497, 1900.11)</l>
 <c></c>
 <c></c>
 <c>            *                             top      left     bot     right     </c>
@@ -170,9 +170,11 @@
 <l>        intersection (Rectanglefilter, SelectedRegions4, RegionIntersection_filter)</l>
 <l>        union2 (RegionIntersection, RegionIntersection_filter, RegionUnion_filter)</l>
 <l>        opening_circle (RegionUnion_filter, RegionUnion_filter, Opening_Circle)</l>
+<l>        connection (RegionUnion_filter, RegionConnection_filter)</l>
+<l>        select_shape (RegionConnection_filter, SelectedRegions_filter, 'width', 'and', 500, 99999)</l>
 <c></c>
 <c>        *Display boundary</c>
-<l>         boundary (RegionUnion_filter, RegionBorder1, 'inner')</l>
+<l>         boundary (SelectedRegions_filter, RegionBorder1, 'inner')</l>
 <l>        dev_clear_window()</l>
 <l>        dev_display(Image.at(1))</l>
 <l>        dev_set_color ('green')         </l>
@@ -273,9 +275,11 @@
 <l>        intersection (Rectanglefilter_bot, SelectedRegions4_bot, RegionIntersection_filter_bot)</l>
 <l>        union2 (RegionIntersection_bot, RegionIntersection_filter_bot, RegionUnion_filter_bot)</l>
 <l>        opening_circle (RegionUnion_filter_bot, RegionUnion_filter_bot, Opening_Circle_bot)</l>
+<l>        connection (RegionUnion_filter_bot, RegionConnection_filter_bot)</l>
+<l>        select_shape (RegionConnection_filter_bot, SelectedRegions_filter_bot, 'width', 'and', 500, 99999)</l>
 <c></c>
 <c>        *Display boundary</c>
-<l>         boundary (RegionUnion_filter_bot, RegionBorder1_bot, 'inner')</l>
+<l>         boundary (SelectedRegions_filter_bot, RegionBorder1_bot, 'inner')</l>
 <l>         dev_set_color ('red')</l>
 <l>         dev_clear_window()</l>
 <l>         dev_display (Image.at(4))</l>
