@@ -1,0 +1,234 @@
+[PVI Area]
+Count=3
+
+[PVIArea_1]
+Enable=1
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=4
+Device Mask Type=0
+Device Mask Type_1=0
+Device Mask Type_2=0
+Device Mask Type_3=0
+Device Mask Type_4=0
+Recheck Enable=1
+Min. Mean GV Diff=10
+Max Contrast=60
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos1Top=593
+TeachPviArea RectPos1Bot=2015
+TeachPviArea RectPos1Lft=343
+TeachPviArea RectPos1Rht=1600
+TeachPviAreaMaskRegion RectPos1Mask1Top=635
+TeachPviAreaMaskRegion RectPos1Mask1Bot=2025
+TeachPviAreaMaskRegion RectPos1Mask1Lft=471
+TeachPviAreaMaskRegion RectPos1Mask1Rht=536
+TeachPviAreaMaskRegion RectPos1Mask2Top=637
+TeachPviAreaMaskRegion RectPos1Mask2Bot=2026
+TeachPviAreaMaskRegion RectPos1Mask2Lft=733
+TeachPviAreaMaskRegion RectPos1Mask2Rht=795
+TeachPviAreaMaskRegion RectPos1Mask3Top=637
+TeachPviAreaMaskRegion RectPos1Mask3Bot=2027
+TeachPviAreaMaskRegion RectPos1Mask3Lft=995
+TeachPviAreaMaskRegion RectPos1Mask3Rht=1057
+TeachPviAreaMaskRegion RectPos1Mask4Top=637
+TeachPviAreaMaskRegion RectPos1Mask4Bot=2032
+TeachPviAreaMaskRegion RectPos1Mask4Lft=1257
+TeachPviAreaMaskRegion RectPos1Mask4Rht=1317
+TeachPviArea Polygon Point Count1=3
+TeachPviArea PolygonPos1Point1X=700
+TeachPviArea PolygonPos1Point1Y=700
+TeachPviArea PolygonPos1Point2X=750
+TeachPviArea PolygonPos1Point2Y=700
+TeachPviArea PolygonPos1Point3X=800
+TeachPviArea PolygonPos1Point3Y=700
+Defect Count=2
+
+[PVIArea_1_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_1_DefectsIndex]
+1=11111
+2=11112
+
+[PVIArea_1_Defects]
+11111=FM
+11112=Scratch
+
+[PVIArea_1_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=40
+MinLength=80
+MinSquareSize=80
+MinCount=1
+
+[PVIArea_1_Scratch]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=40
+MinLength=300
+MinSquareSize=15
+MinCount=1
+
+[PVIArea_2]
+Enable=1
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=3
+Device Mask Type=0
+Device Mask Type_1=0
+Device Mask Type_2=0
+Device Mask Type_3=0
+Recheck Enable=1
+Min. Mean GV Diff=35
+Max Contrast=40
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos2Top=655
+TeachPviArea RectPos2Bot=2002
+TeachPviArea RectPos2Lft=472
+TeachPviArea RectPos2Rht=1320
+TeachPviAreaMaskRegion RectPos2Mask1Top=615
+TeachPviAreaMaskRegion RectPos2Mask1Bot=2034
+TeachPviAreaMaskRegion RectPos2Mask1Lft=536
+TeachPviAreaMaskRegion RectPos2Mask1Rht=733
+TeachPviAreaMaskRegion RectPos2Mask2Top=616
+TeachPviAreaMaskRegion RectPos2Mask2Bot=2031
+TeachPviAreaMaskRegion RectPos2Mask2Lft=795
+TeachPviAreaMaskRegion RectPos2Mask2Rht=995
+TeachPviAreaMaskRegion RectPos2Mask3Top=616
+TeachPviAreaMaskRegion RectPos2Mask3Bot=2031
+TeachPviAreaMaskRegion RectPos2Mask3Lft=1057
+TeachPviAreaMaskRegion RectPos2Mask3Rht=1257
+TeachPviArea Polygon Point Count2=3
+TeachPviArea PolygonPos2Point1X=700
+TeachPviArea PolygonPos2Point1Y=700
+TeachPviArea PolygonPos2Point2X=750
+TeachPviArea PolygonPos2Point2Y=700
+TeachPviArea PolygonPos2Point3X=800
+TeachPviArea PolygonPos2Point3Y=700
+Defect Count=2
+
+[PVIArea_2_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=2.800000e+01
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_2_DefectsIndex]
+1=11121
+2=11122
+
+[PVIArea_2_Defects]
+11121=FM
+11122=Scratch
+
+[PVIArea_2_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=30
+MinSquareSize=30
+MinCount=2
+
+[PVIArea_2_Scratch]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=300
+MinSquareSize=15
+MinCount=1
+
+[PVIArea_3]
+Enable=1
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=3
+Device Mask Type=1
+Device Mask Type_1=0
+Device Mask Type_2=0
+Device Mask Type_3=0
+Recheck Enable=1
+Min. Mean GV Diff=10
+Max Contrast=40
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos3Top=596
+TeachPviArea RectPos3Bot=616
+TeachPviArea RectPos3Lft=1581
+TeachPviArea RectPos3Rht=1601
+TeachPviAreaMaskRegion RectPos3Mask1Top=592
+TeachPviAreaMaskRegion RectPos3Mask1Bot=2041
+TeachPviAreaMaskRegion RectPos3Mask1Lft=367
+TeachPviAreaMaskRegion RectPos3Mask1Rht=1560
+TeachPviAreaMaskRegion RectPos3Mask2Top=605
+TeachPviAreaMaskRegion RectPos3Mask2Bot=632
+TeachPviAreaMaskRegion RectPos3Mask2Lft=351
+TeachPviAreaMaskRegion RectPos3Mask2Rht=381
+TeachPviAreaMaskRegion RectPos3Mask3Top=634
+TeachPviAreaMaskRegion RectPos3Mask3Bot=703
+TeachPviAreaMaskRegion RectPos3Mask3Lft=198
+TeachPviAreaMaskRegion RectPos3Mask3Rht=202
+TeachPviArea Polygon Point Count3=6
+TeachPviArea PolygonPos3Point1X=349
+TeachPviArea PolygonPos3Point1Y=605
+TeachPviArea PolygonPos3Point2X=349
+TeachPviArea PolygonPos3Point2Y=1065
+TeachPviArea PolygonPos3Point3X=349
+TeachPviArea PolygonPos3Point3Y=2012
+TeachPviArea PolygonPos3Point4X=1591
+TeachPviArea PolygonPos3Point4Y=2013
+TeachPviArea PolygonPos3Point5X=1591
+TeachPviArea PolygonPos3Point5Y=1211
+TeachPviArea PolygonPos3Point6X=1591
+TeachPviArea PolygonPos3Point6Y=606
+Defect Count=1
+
+[PVIArea_3_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=2.800000e+01
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_3_DefectsIndex]
+1=11131
+
+[PVIArea_3_Defects]
+11131=SU8 Edge
+
+[PVIArea_3_SU8 Edge]
+Enable=1
+DefectCharacteristics=0
+Size=2000
+Contrast=50
+MinLength=60
+MinSquareSize=60
+MinCount=1
+

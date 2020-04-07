@@ -1,0 +1,18 @@
+[NUM USER]
+NoOfUsers=2
+
+[User0]
+Name=engineer
+Level=Administrator
+Pswd=>G74:
+
+[User1]
+Name=a
+Level=Administrator
+Pswd=R25>?
+
+[User2]
+Name=Don
+Level=Technician
+Pswd=U`_E649
+

@@ -1,0 +1,179 @@
+[Cover Layer]
+Enable=0
+
+[Cover Layer :: Cover Layer 1]
+Max. Intensity=60
+Min. Length=50
+Min. Height=6000
+Mask Size=1.500000e+01
+Gap Width Tolerance=1.500000e+02
+Gap Height Tolerance=1.000000e+02
+
+[Cover Layer :: Cover Layer 2]
+Max. Intensity=100
+Min. Length=8000
+Min. Height=50
+Mask Size=1.500000e+01
+Gap Width Tolerance=1.000000e+02
+Gap Height Tolerance=1.500000e+02
+
+[Cover Layer :: Cover Layer 3]
+Max. Intensity=60
+Min. Length=50
+Min. Height=6000
+Mask Size=1.500000e+01
+Gap Width Tolerance=1.500000e+02
+Gap Height Tolerance=1.000000e+02
+
+[Cover Layer :: Cover Layer 4]
+Max. Intensity=128
+Min. Length=5500
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=2.500000e+01
+Gap Height Tolerance=2.500000e+01
+
+[Cover Layer :: Cover Layer 5]
+Max. Intensity=128
+Min. Length=5500
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=2.500000e+01
+Gap Height Tolerance=2.500000e+01
+
+[Cover Layer Alignment]
+Enable=0
+
+[Cover Layer Alignment :: Pointer 1]
+Cover Layer Direction=0
+Tolerance=2.000000e+01
+
+[Cover Layer Alignment :: Pointer 2]
+Cover Layer Direction=1
+Tolerance=2.000000e+01
+
+[Cover Layer Alignment :: Pointer 3]
+Cover Layer Direction=0
+Tolerance=2.000000e+01
+
+[Cover Layer Alignment :: Pointer 4]
+Cover Layer Direction=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 5]
+Cover Layer Direction=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 6]
+Cover Layer Direction=0
+Tolerance=1.100000e+02
+
+[Encap]
+Enable=0
+Enable Encap Surface=0
+Edge Offset=1.800000e+01
+Max. Lay On=5.000000e+01
+
+[Encap :: Crack]
+Crack Contrast=50
+Min. Size=20
+Min. Length=200
+Min. Square Size=10
+
+[Encap :: Blow Hole]
+Blow Hole Contrast=50
+Min. Size=20
+Min. Circularity=5.000000e-01
+Min. Length=10
+Min. Square Size=12
+Max. Intensity=100
+
+[Encap :: Contamination]
+Contamination Contrast=50
+Min. Size=20
+Max. Circularity=5.000000e-01
+Min. Length=10
+Min. Square Size=12
+
+[Slot]
+Enable=0
+
+[Slot :: Slot 1]
+Enable Check Surface=0
+Edge Offset=0
+Contrast=80
+Min. Mean GV Diff=50
+Min. Size=200
+Min. Length=100
+Min. Square Size=5
+Min. Count=1
+
+[Slot :: Slot 2]
+Enable Check Surface=0
+Edge Offset=0
+Contrast=80
+Min. Mean GV Diff=50
+Min. Size=200
+Min. Length=100
+Min. Square Size=5
+Min. Count=1
+
+[Slot :: Slot 3]
+Enable Check Surface=0
+Edge Offset=0
+Contrast=80
+Min. Mean GV Diff=50
+Min. Size=200
+Min. Length=100
+Min. Square Size=5
+Min. Count=1
+
+[Slot :: Slot 4]
+Enable Check Surface=0
+Edge Offset=0
+Contrast=80
+Min. Mean GV Diff=50
+Min. Size=200
+Min. Length=100
+Min. Square Size=5
+Min. Count=1
+
+[Slot :: Slot 5]
+Enable Check Surface=0
+Edge Offset=0
+Contrast=80
+Min. Mean GV Diff=50
+Min. Size=200
+Min. Length=100
+Min. Square Size=5
+Min. Count=1
+
+[Tilt]
+Enable=0
+Object Intensity=0
+Measuring Width=20
+
+[Die Edge]
+Enable=0
+Defect Characteristics=0
+Min Size=3000
+Contrast=80
+Min Length=275
+Min SquareSize=110
+Min Count=1
+Insp Offset=0.000000e+00
+Insp Width=0.000000e+00
+
+[Encap Magnus]
+Enable=0
+Min Thresh=40
+Max Thresh=220
+Crop Expand Width=220
+Crop Expand Height=220
+Dilate Kernel Width=7
+Dilate Kernel Height=7
+Opening Kernel Width=1
+Opening Kernel Height=1
+Crop Smooth=151
+Area Object=999999
+
