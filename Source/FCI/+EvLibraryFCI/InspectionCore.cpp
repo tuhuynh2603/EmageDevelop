@@ -1008,23 +1008,21 @@ int CInspectionCore::Teach(HImage hImages,
 		////////// Remove White and black region /////////////
 		HRegion hDiffRegion_magnus;
 		Difference(hRectangle_DeviceLocation_magnus, hUnionRegion_WhiteBlackBL_magnus, &hDiffRegion_magnus);
-		HRegion hFillupRegion_diff_magnus;
-		FillUp(hDiffRegion_magnus, &hFillupRegion_diff_magnus);
-		HRegion hRegionOpening_fill_magnus;
-
 		//////////////Remove top black line ( filter)
-
+		HRegion hRegionOpening_fill_magnus;
 		int nX_Opening_fill_magnus = m_TrainingData.nOpeningX_EncapManus;
 		int nY_Opening_fill_magnus = m_TrainingData.nOpeningY_EncapManus;
-		OpeningRectangle1(hFillupRegion_diff_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
+		OpeningRectangle1(hDiffRegion_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
 
-		///////////////////////////////// Select shape////////
+		///////////////////////////////// Select shape and fillup////////
 
 		HRegion hConnection_opening_magnus, hRegionOpening_Select_magnus, hRegionOpening_Circle_magnus;
 		int nValueOpening_Circle_magnus = m_TrainingData.nValue_OpeningCircle_magnus;
 		Connection(hRegionOpening_fill_magnus, &hConnection_opening_magnus);
 		SelectShape(hConnection_opening_magnus, &hRegionOpening_Select_magnus, "width", "and", 400, 9999);
-		OpeningCircle(hRegionOpening_Select_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
+		HRegion hFillupRegion_diff_magnus;
+		FillUp(hRegionOpening_Select_magnus, &hFillupRegion_diff_magnus);
+		OpeningCircle(hFillupRegion_diff_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
 
 	//////////////////// gen Crop smooth contour to intersection/////////////
 	HXLD hContour_Encap_magnus, hCropContour_After_magnus;
@@ -4733,15 +4731,14 @@ int CInspectionCore::Inspect(HImage hImage,
 			////////// Remove White and black region /////////////
 			HRegion hDiffRegion_magnus;
 			Difference(hRectangle_DeviceLocation_magnus, hUnionRegion_WhiteBlackBL_magnus, &hDiffRegion_magnus);
-			HRegion hFillupRegion_diff_magnus;
-			FillUp(hDiffRegion_magnus, &hFillupRegion_diff_magnus);
-			HRegion hRegionOpening_fill_magnus;
+
+			
 
 			//////////////Remove top black line ( filter)
-
+			HRegion hRegionOpening_fill_magnus;
 			int nX_Opening_fill_magnus = m_TrainingData.nOpeningX_EncapManus;
 			int nY_Opening_fill_magnus = m_TrainingData.nOpeningY_EncapManus;
-			OpeningRectangle1(hFillupRegion_diff_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
+			OpeningRectangle1(hDiffRegion_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
 
 			///////////////////////////////// Select shape////////
 
@@ -4749,7 +4746,9 @@ int CInspectionCore::Inspect(HImage hImage,
 			int nValueOpening_Circle_magnus = m_TrainingData.nValue_OpeningCircle_magnus;
 			Connection(hRegionOpening_fill_magnus, &hConnection_opening_magnus);
 			SelectShape(hConnection_opening_magnus, &hRegionOpening_Select_magnus, "width", "and", 200, 9999);
-			OpeningCircle(hRegionOpening_Select_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
+			HRegion hFillupRegion_diff_magnus;
+			FillUp(hRegionOpening_Select_magnus, &hFillupRegion_diff_magnus);		
+			OpeningCircle(hFillupRegion_diff_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
 
 			//////////////////// gen Crop smooth contour to intersection/////////////
 			HXLD hContour_Encap_magnus, hCropContour_After_magnus;
