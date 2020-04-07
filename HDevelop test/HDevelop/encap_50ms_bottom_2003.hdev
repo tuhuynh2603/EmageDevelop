@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="13.0.2.2">
+<procedure name="main">
+<interface/>
+<body>
+<l> dev_open_file_dialog ('read_image', 'dir', 'default', Selection)</l>
+<c></c>
+<l>file_name := Selection +'/'</l>
+<l>file_name_1 := 'HP_FCI_THA1_Pos1_B2.bmp'</l>
+<l>file_name_4 := 'HP_FCI_THA1_Pos4_B2.bmp'</l>
+<c></c>
+<l>first_file := 2720816991</l>
+<l>end_file := 2720817184</l>
+<c></c>
+<l>Width_Select_min := 1200</l>
+<l>Width_Select_max := 1800</l>
+<c></c>
+<l>Thresh_Min := 140</l>
+<l>Thresh_Max := 255</l>
+<l>Thresh_Black := 25</l>
+<l>Thresh_White := 220</l>
+<c></c>
+<c></c>
+<l>Dilate_Width := 1</l>
+<l>Dilate_Height := 5</l>
+<l>Opening_Rect_Width := 30</l>
+<l>Opening_Rect_Height := 1</l>
+<c></c>
+<l>Smooth_Value_Crop := 75</l>
+<l>Shape_Width := 500</l>
+<l>Opening_Circle := 20</l>
+<l>Opening_Circle_Crop :=40</l>
+<l>Crop_Smooth_Height := 0</l>
+<c></c>
+<c></c>
+<l>Thresh_Min_bot := 140</l>
+<l>Thresh_Max_bot := 255</l>
+<l>Thresh_Black_bot := 25</l>
+<l>Thresh_White_bot := 220</l>
+<c></c>
+<l>Dilate_Width_bot := 1</l>
+<l>Dilate_Height_bot := 5</l>
+<l>Opening_Rect_Width_bot := 30</l>
+<l>Opening_Rect_Height_bot := 1</l>
+<c></c>
+<l>Smooth_Value_Crop_bot := 75</l>
+<l>Shape_Width_bot := 500</l>
+<l>Opening_Circle_bot := 40</l>
+<l>Opening_Circle_Crop_bot := 40</l>
+<l>Crop_Smooth_Height_bot := 40</l>
+<c></c>
+<c></c>
+<c>* Top</c>
+<l>Left_Crop_Expand := 230</l>
+<l>Right_Crop_Expand := 230</l>
+<l>Height_Crop_Expand := 230</l>
+<c></c>
+<l>Left_SmoothBLCrop_Expand := 230</l>
+<l>Right_SmoothBLCrop_Expand := 230</l>
+<l>Height_SmoothCrop_Expand_bot := 230</l>
+<c></c>
+<c></c>
+<c>* Bottom</c>
+<c></c>
+<l>Left_Crop_Expand_bot := 230</l>
+<l>Right_Crop_Expand_bot := 230</l>
+<l>Height_Crop_Expand_bot := 230</l>
+<c></c>
+<l>Left_SmoothBLCrop_Expand_bot := 230</l>
+<l>Right_SmoothBLCrop_Expand_bot := 230</l>
+<l>Height_SmoothBLCrop_Expand_bot := 230</l>
+<c></c>
+<c></c>
+<c>* end param</c>
+<c></c>
+<l>for i:= first_file to end_file by 1</l>
+<c>    </c>
+<l>    path_1 := file_name + i + '/' + file_name_1  </l>
+<l>    path_4 := file_name + i + '/' + file_name_4  </l>
+<l>    try</l>
+<l>        read_image (Image.at(1), path_1)</l>
+<l>        read_image (Image.at(4), path_4)</l>
+<c>   </c>
+<c>        * encap bottom top -</c>
+<l>        threshold (Image.at(1), Region, Thresh_Min, Thresh_Max)</l>
+<l>        connection (Region, Connection)</l>
+<l>        select_shape (Connection, SelectedRegions3, 'area', 'and', 1000000, 2000000)</l>
+<l>        boundary (SelectedRegions3, RegionBorder, 'inner')</l>
+<l>        get_region_points (RegionBorder, Rows1, Columns1)</l>
+<c>        </c>
+<c>        * top bot right left</c>
+<l>        tuple_max (Rows1, Y_Bot)</l>
+<l>        tuple_min (Rows1, Y_Top)</l>
+<l>        tuple_max (Columns1, X_Right)</l>
+<l>        tuple_min (Columns1, X_Left)</l>
+<c>    </c>
+<l>        if (i = first_file)   </l>
+<l>            gen_rectangle1 (SmoothBL_ROI, 156.611, 628.721, 288.259, 1561.39)</l>
+<l>            gen_rectangle1 (Encap_ROI, 240.907, 243.05, 509.497, 1855.11)</l>
+<c></c>
+<c></c>
+<c>            *                             top      left     bot     right     </c>
+<l>            get_region_points (SmoothBL_ROI, Rows_SmoothBL_ROI, Cols_SmoothBL_ROI)</l>
+<l>            get_region_points( SmoothBL_ROI, Rows_SmoothBL_ROI, Cols_SmoothBL_ROI)</l>
+<l>            tuple_max (Rows_SmoothBL_ROI, Y_Bot_SmoothBLROI)</l>
+<l>            tuple_min (Rows_SmoothBL_ROI, Y_Top_SmoothBLROI)</l>
+<l>            tuple_max (Cols_SmoothBL_ROI, X_Right_SmoothBLROI)</l>
+<l>            tuple_min (Cols_SmoothBL_ROI, X_Left_SmoothBLROI)</l>
+<c>            </c>
+<l>            get_region_points( Encap_ROI, Rows_Encap_ROI, Cols_Encap_ROI)</l>
+<l>            tuple_max (Rows_Encap_ROI, Y_Bot_ROI)</l>
+<l>            tuple_min (Rows_Encap_ROI, Y_Top_ROI)</l>
+<l>            tuple_max (Cols_Encap_ROI, X_Right_ROI)</l>
+<l>            tuple_min (Cols_Encap_ROI, X_Left_ROI)</l>
+<c>            </c>
+<l>            Left_Crop_Expand := X_Left - X_Left_ROI</l>
+<l>            Right_Crop_Expand := X_Right_ROI -X_Right</l>
+<l>            Height_Crop_Expand := Y_Top - Y_Top_ROI</l>
+<c>           </c>
+<l>        endif  </l>
+<l>        CropEncap_Left := X_Left - Left_Crop_Expand</l>
+<l>        CropEncap_Right := X_Right + Right_Crop_Expand</l>
+<l>        CropEncap_Top := Y_Top - Height_Crop_Expand</l>
+<l>        CropEncap_Bot := Y_Top   </l>
+<l>        if (i = first_file)</l>
+<l>           Left_SmoothBLCrop_Expand := X_Left- X_Left_SmoothBLROI</l>
+<l>           Right_SmoothBLCrop_Expand := X_Right_SmoothBLROI - X_Right</l>
+<l>           Height_SmoothBLCrop_Expand := Y_Bot_SmoothBLROI - CropEncap_Top</l>
+<l>        endif</l>
+<l>        CropSmoothBL_Left := X_Left - Left_SmoothBLCrop_Expand</l>
+<l>        CropSmoothBL_Right := X_Right + Right_SmoothBLCrop_Expand</l>
+<l>        CropSmoothBL_Top := CropEncap_Top</l>
+<l>        CropSmoothBL_Bot := CropEncap_Top + Height_SmoothBLCrop_Expand</l>
+<c>        </c>
+<l>        gen_rectangle1 (Rectangle_Encap, CropEncap_Top, CropEncap_Left , CropEncap_Bot, CropEncap_Right )                  </l>
+<l>        gen_rectangle1 (Rectangle_SmoothBL, CropSmoothBL_Top, CropSmoothBL_Left , CropSmoothBL_Bot, CropSmoothBL_Right )                </l>
+<c>        </c>
+<c>        * Crop Encap</c>
+<l>        reduce_domain (Image.at(1),Rectangle_Encap ,ImageReduced1)</l>
+<l>        threshold (ImageReduced1, Regions, 0, Thresh_Black)</l>
+<l>        threshold (ImageReduced1, Regions1, Thresh_White, 255)</l>
+<c>        </c>
+<c>        * Dilation to remove intersection line (White and Black region)</c>
+<l>*         dilation_rectangle1 (Regions1, Regions1, Dilate_Width, Dilate_Height)</l>
+<l>*         dilation_rectangle1 (Regions, Regions,Dilate_Width,Dilate_Height)     </l>
+<l>        union2 (Regions,Regions1, RegionUnion)  </l>
+<l>        union2(RegionUnion, Rectangle_SmoothBL, RegionUnionBL)</l>
+<c>    </c>
+<c>        * Remove Black and White region</c>
+<l>*         fill_up (RegionUnionBL_bot, Regionfillup)              </l>
+<l>        difference (Rectangle_Encap, RegionUnionBL, RegionDifference1)</l>
+<l>        fill_up (RegionDifference1, RegionFillUp)</l>
+<l>        opening_rectangle1 (RegionFillUp, RegionOpening,Opening_Rect_Width,Opening_Rect_Height)</l>
+<l>        connection (RegionOpening, ConnectedRegions2)</l>
+<l>        select_shape (ConnectedRegions2, SelectedRegions4, 'width', 'and', 400, 99999)</l>
+<c>        *opening to smooth </c>
+<l>        opening_circle (SelectedRegions4, RegionOpening, Opening_Circle_Crop)</l>
+<l>        gen_contour_region_xld (RegionOpening, Contours2, 'center')        </l>
+<l>        smooth_contours_xld (Contours2, SmoothedContours, 151)    </l>
+<c>        </c>
+<c>        *crop contour to smooth </c>
+<l>        crop_contours_xld (SmoothedContours, CroppedContours_filter, CropEncap_Bot - Crop_Smooth_Height, CropEncap_Left, CropEncap_Bot , CropEncap_Right, 'true')        </l>
+<l>        gen_region_contour_xld (CroppedContours_filter, Crop_Region_filter, 'filled')</l>
+<l>        intersection (Crop_Region_filter, RegionOpening, RegionIntersection)</l>
+<c>        </c>
+<c>        * Crop contour no smooth</c>
+<l>        gen_rectangle1 (Rectanglefilter, CropEncap_Top , CropEncap_Left , CropEncap_Bot - Crop_Smooth_Height, CropEncap_Right)               </l>
+<c>        </c>
+<c>        * Union 2 region smooth and nosmooth</c>
+<l>        intersection (Rectanglefilter, SelectedRegions4, RegionIntersection_filter)</l>
+<l>        union2 (RegionIntersection, RegionIntersection_filter, RegionUnion_filter)</l>
+<l>        opening_circle (RegionUnion_filter, RegionUnion_filter, Opening_Circle)</l>
+<c></c>
+<c>        *Display boundary</c>
+<l>         boundary (RegionUnion_filter, RegionBorder1, 'inner')</l>
+<l>        dev_clear_window()</l>
+<l>        dev_display(Image.at(1))</l>
+<l>        dev_set_color ('green')         </l>
+<l>        dev_display(RegionBorder1)</l>
+<l>        stop()</l>
+<l>        dev_clear_window()</l>
+<c>        </c>
+<c>        </c>
+<c>        </c>
+<c>        </c>
+<c>        </c>
+<c>       *encap bottom bot</c>
+<c>        * Rectangle Encap  </c>
+<l>        threshold (Image.at(4), Region_bot, Thresh_Min_bot, Thresh_Max_bot)</l>
+<l>        connection (Region_bot, Connection_bot)</l>
+<l>        select_shape (Connection_bot, SelectedRegions3_bot, 'area', 'and', 1000000, 2000000)</l>
+<l>        boundary (SelectedRegions3_bot, RegionBorder_bot, 'inner')</l>
+<l>        get_region_points (RegionBorder_bot, Rows1_bot, Columns1_bot)</l>
+<c>        </c>
+<l>        tuple_max (Rows1_bot, Y_Bot_bot)</l>
+<l>        tuple_min (Rows1_bot, Y_Top_bot)</l>
+<l>        tuple_max (Columns1_bot, X_Right_bot)</l>
+<l>        tuple_min (Columns1_bot, X_Left_bot)            </l>
+<l>        if (i = first_file)          </l>
+<c>            </c>
+<c>                *                             top      left     bot     right</c>
+<l>            gen_rectangle1 (SmoothBL_ROI_bot, 1320.05, 523.595, 1365.17, 1683.82)</l>
+<l>            gen_rectangle1 (Encap_ROI_bot, 1043.6, 208.354, 1328.45, 1820.1)</l>
+<c></c>
+<l>            get_region_points( SmoothBL_ROI_bot, Rows_SmoothBL_ROI_bot, Cols_SmoothBL_ROI_bot)</l>
+<l>            tuple_max (Rows_SmoothBL_ROI_bot, Y_Bot_SmoothBLROI_bot)</l>
+<l>            tuple_min (Rows_SmoothBL_ROI_bot, Y_Top_SmoothBLROI_bot)</l>
+<l>            tuple_max (Cols_SmoothBL_ROI_bot, X_Right_SmoothBLROI_bot)</l>
+<l>            tuple_min (Cols_SmoothBL_ROI_bot, X_Left_SmoothBLROI_bot)</l>
+<c>            </c>
+<l>            get_region_points( Encap_ROI_bot, Rows_Encap_ROI_bot, Cols_Encap_ROI_bot)</l>
+<l>            tuple_max (Rows_Encap_ROI_bot, Y_Bot_ROI_bot)</l>
+<l>            tuple_min (Rows_Encap_ROI_bot, Y_Top_ROI_bot)</l>
+<l>            tuple_max (Cols_Encap_ROI_bot, X_Right_ROI_bot)</l>
+<l>            tuple_min (Cols_Encap_ROI_bot, X_Left_ROI_bot)</l>
+<l>            Left_Crop_Expand_bot := X_Left - X_Left_ROI_bot</l>
+<l>            Right_Crop_Expand_bot := X_Right_ROI -X_Right_bot</l>
+<l>            Height_Crop_Expand_bot := Y_Bot_ROI_bot - Y_Bot_bot</l>
+<c>               </c>
+<l>        endif  </l>
+<l>        CropEncap_Left_bot := X_Left_bot - Left_Crop_Expand_bot</l>
+<l>        CropEncap_Right_bot := X_Right_bot + Right_Crop_Expand_bot</l>
+<l>        CropEncap_Top_bot := Y_Bot_bot</l>
+<l>        CropEncap_Bot_bot := Y_Bot_bot +  Height_Crop_Expand_bot</l>
+<l>        if (i = first_file)</l>
+<l>           Left_SmoothBLCrop_Expand_bot := X_Left- X_Left_SmoothBLROI_bot</l>
+<l>           Right_SmoothBLCrop_Expand_bot := X_Right_SmoothBLROI_bot - X_Right_bot</l>
+<l>           Height_SmoothBLCrop_Expand_bot := CropEncap_Bot_bot - Y_Top_SmoothBLROI_bot</l>
+<l>        endif</l>
+<l>        CropSmoothBL_Left_bot := X_Left - Left_SmoothBLCrop_Expand_bot</l>
+<l>        CropSmoothBL_Right_bot := X_Right + Right_SmoothBLCrop_Expand_bot</l>
+<l>        CropSmoothBL_Bot_bot := CropEncap_Bot_bot</l>
+<l>        CropSmoothBL_Top_bot := CropEncap_Bot_bot - Height_SmoothBLCrop_Expand_bot</l>
+<c>        </c>
+<l>        gen_rectangle1 (Rectangle_Encap_bot, CropEncap_Top_bot, CropEncap_Left_bot , CropEncap_Bot_bot, CropEncap_Right_bot )                  </l>
+<l>        gen_rectangle1 (Rectangle_SmoothBL_bot, CropSmoothBL_Top_bot, CropSmoothBL_Left_bot , CropSmoothBL_Bot_bot, CropSmoothBL_Right_bot )                       </l>
+<l>        reduce_domain (Image.at(4),Rectangle_Encap_bot, ImageReduced1_bot)</l>
+<c>        </c>
+<c>        * Threshold white and black region</c>
+<l>        threshold (ImageReduced1_bot, Regions_bot, 0, Thresh_Black_bot)</l>
+<l>        threshold (ImageReduced1_bot, Regions1_bot, Thresh_White_bot, 255)</l>
+<l>        dilation_rectangle1 (Regions1_bot, Regions1_dilate_bot, Dilate_Width_bot, Dilate_Height_bot)</l>
+<l>        dilation_rectangle1 (Regions_bot, Regions_dilate_bot,Dilate_Width_bot,Dilate_Height_bot)  </l>
+<c>        *union 2 region white dilation and black</c>
+<l>        union2 (Regions_dilate_bot, Regions1_dilate_bot,RegionUnion0_bot)       </l>
+<l>        union2(RegionUnion0_bot, Rectangle_SmoothBL_bot, RegionUnionBL_bot)</l>
+<l>        connection (RegionUnionBL_bot, ConnectedRegions_bot)</l>
+<c>        </c>
+<l>*         select_shape (ConnectedRegions_bot, SelectedRegions_bot, 'area', 'and', shape_area_remove, 999999)                 </l>
+<l>*         fill_up (SelectedRegions_bot, Regionfillup_bot)  </l>
+<c>        </c>
+<c>        * Remove black and white region</c>
+<l>        difference (Rectangle_Encap_bot, ConnectedRegions_bot, RegionDifference1_bot)       </l>
+<l>        fill_up (RegionDifference1_bot, RegionFillUp1_bot)</l>
+<l>        opening_rectangle1 (RegionFillUp1_bot, RegionOpening1_bot, Opening_Rect_Width_bot,Opening_Rect_Height_bot)    </l>
+<l>        connection (RegionOpening1_bot, ConnectedRegions2_bot)</l>
+<l>         select_shape (ConnectedRegions2_bot, SelectedRegions4_bot, 'width', 'and', 500, 99999)</l>
+<c>        </c>
+<c>        *opening to smooth </c>
+<l>        opening_circle (SelectedRegions4_bot, RegionOpening_bot, Opening_Circle_Crop_bot)</l>
+<l>        gen_contour_region_xld (RegionOpening_bot, Contours2_bot, 'center')</l>
+<l>        smooth_contours_xld (Contours2_bot, SmoothedContours_bot , Smooth_Value_Crop_bot)    </l>
+<c>        </c>
+<c>        *crop contour to smooth </c>
+<l>        crop_contours_xld (SmoothedContours_bot, CroppedContours_filter_bot, CropEncap_Top_bot, CropEncap_Left_bot, CropEncap_Top_bot + Crop_Smooth_Height_bot, CropEncap_Right_bot, 'true')        </l>
+<l>        gen_region_contour_xld (CroppedContours_filter_bot, Crop_Region_filter_bot, 'filled')</l>
+<l>        intersection (Crop_Region_filter_bot, RegionOpening_bot, RegionIntersection_bot)</l>
+<c>        </c>
+<c>        * Crop contour no smooth</c>
+<l>        gen_rectangle1 (Rectanglefilter_bot, CropEncap_Top_bot + Crop_Smooth_Height_bot , CropEncap_Left_bot , CropEncap_Bot_bot, CropEncap_Right_bot)               </l>
+<c>        </c>
+<c>        * Union 2 region smooth and nosmooth</c>
+<l>        intersection (Rectanglefilter_bot, SelectedRegions4_bot, RegionIntersection_filter_bot)</l>
+<l>        union2 (RegionIntersection_bot, RegionIntersection_filter_bot, RegionUnion_filter_bot)</l>
+<l>        opening_circle (RegionUnion_filter_bot, RegionUnion_filter_bot, Opening_Circle_bot)</l>
+<c></c>
+<c>        *Display boundary</c>
+<l>         boundary (RegionUnion_filter_bot, RegionBorder1_bot, 'inner')</l>
+<l>         dev_set_color ('red')</l>
+<l>         dev_clear_window()</l>
+<l>         dev_display (Image.at(4))</l>
+<l>         dev_set_color ('green')</l>
+<l>         dev_display (RegionBorder1_bot)    </l>
+<l>         stop()</l>
+<l>     catch(Exception)</l>
+<l>     endtry</l>
+<l>endfor</l>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
