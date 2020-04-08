@@ -364,6 +364,7 @@ CTrainingData::CTrainingData()
 	hTuplePointerModelIDs = HTuple();
 
 	bCentralizedVerificationMode = FALSE;
+
 	for(int i = 0;i<5;i++)
 		nNoOfPviArea=1;
 
@@ -2674,14 +2675,7 @@ int CInspectionCore::Inspect(HImage hImage,
 			if (nStepDebug) {
 				StepDebug(hDebugImg, hDebugRgn, colorCyan, hDebugMsg, bRegionInsp);
 			}
-			HTuple hErosionOffsetBG = m_EncapParm.dErosionOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-			ErosionCircle(hEncapLocation, &hEncapLocation, hErosionOffsetBG);
-			ReduceDomain(hImage, hEncapLocation, &m_DefectData[nCurDoc].EncapProcessedBackGround);
-			HRegion hRegionBG;
-			Threshold(m_DefectData[nCurDoc].EncapProcessedBackGround, &hRegionBG, 2, 255);
-			HTuple hRow1, hColumn1, hRow2, hColumn2;
-			SmallestRectangle1(hRegionBG, &hRow1, &hColumn1, &hRow2, &hColumn2);
-			CropRectangle1(m_DefectData[nCurDoc].EncapProcessedBackGround, &m_DefectData[nCurDoc].EncapProcessedBackGround, hRow1-50, hColumn1-50, hRow2+50, hColumn2+50);
+
 			if (hIsEncap == TRUE) {
 				m_arrayOverlayInspection.Add(hEncapLocation, colorOrange);
 

@@ -55,7 +55,7 @@ CInspection::CInspection()
 	bInspectAll = FALSE;
 	m_bEnableDLModelInspect = FALSE;
 	m_bUseDLModelResult = FALSE;
-	m_bRemoveBackGround = FALSE;
+
 	m_strDLTempFolder = "SAEdge Vision\\";
 	TCHAR tTempPath[MAX_PATH];
 	if (GetTempPath(MAX_PATH, tTempPath) != 0) {
@@ -662,8 +662,7 @@ int CInspection::Inspect(CSharedData* pData,
 		else {
 			pTrainingData->bEnableDLModelInspect = FALSE;
 		}
-				//pTrainingData->bEnableDLModelInspect = TRUE;
-				//pDeepLearningModule->m_bDLModelInspectFromFile = 1;
+
 		nError = CInspectionCore::Inspect(hImage, hTeachImage, lDebugFlag, bRegionInsp, 
 										nCurTrack, nCurDoc, nTotalDoc, nCurFOV, nTotalFOV,
 										pTrainingData, pInspData, pCalibData, 
@@ -676,6 +675,7 @@ int CInspection::Inspect(CSharedData* pData,
 			if(!m_arrayOverlayInspection[j].hImage.IsInitialized())
 				DrawRegion(pData->pImageViews[nCurDoc], m_arrayOverlayInspection[j]);		
 		DrwUpdate(pData->pImageViews[nCurDoc]);*/
+
 		//Deep Learning Model Inspect
 		if (pTrainingData->bEnableDLModelInspect && (nError == -ENCAP_CRACK || nError == -ENCAP_BLOWHOLE || nError == -ENCAP_CONTAMINATION)) {
 			int nErrorDL = 0;
@@ -687,46 +687,14 @@ int CInspection::Inspect(CSharedData* pData,
 
 			if (pDeepLearningModule->m_bDLModelInspectFromFile && m_DefectData[nCurDoc].arrayDefectCenters.size() > 0) {
 				CPerformanceTimer timerDLModelInspect;
-				CString strImagePath2Inspect;
-				
-				if(!m_bRemoveBackGround) {
-					strImagePath2Inspect.Format("%s_Track%d_Doc%d_Fov%d.bmp", strModelName, nCurTrack, nCurDoc, nCurFOV);
-					strImagePath2Inspect = m_strDLTempFolder + strImagePath2Inspect;
-					SaveGrayScaleBMPFile(strImagePath2Inspect, *pImgBufSrc);
-				}
-				else {
-					//CImageBuffer EncapProcessedBackGroundPointer;
-					//HString strType;
-					//Hlong nWidth, nHeight;
-					//CImageBuffer buf;
-					//BYTE* pBuf = (BYTE*)m_DefectData[nCurDoc].EncapProcessedBackGround.GetImagePointer1(&strType, &nWidth, &nHeight);
-					//if (pBuf) {
-					//	CSize szSrc = CSize((int)nWidth, (int)nHeight);
-					//	CRect rectSrc = CRect(CPoint(0, 0), szSrc);
-					//	buf.AllocImgIndirect(szSrc, pBuf);
-					//	CSize szDst = CSize(nWidth, nHeight);
-					//	CRect rectDst = CRect(CPoint(0, 0), szDst);
-					//	CRect rect;
-					//	rect.IntersectRect(rectSrc, rectDst);
-					//	EncapProcessedBackGroundPointer.Allocate(szSrc);
-					//	/*BYTE* pBufEncapProcessedBackGroundPointer = EncapProcessedBackGroundPointer.GetImgPtr();
-					//	std::copy(pBuf, pBuf +(nWidth + nHeight), pBufEncapProcessedBackGroundPointer);*/
-					//	ImgCopy(&buf, &rect, &EncapProcessedBackGroundPointer, &rect);
-					//}		
-					//strImagePath2Inspect.Format("%s_Track%d_Doc%d_Fov%d.bmp", strModelName, nCurTrack, nCurDoc, nCurFOV);
-					//
-					//strImagePath2Inspect = m_strDLTempFolder + strImagePath2Inspect;
-					//SaveGrayScaleBMPFile(strImagePath2Inspect, EncapProcessedBackGroundPointer);
-					
-					strImagePath2Inspect.Format("%s_Track%d_Doc%d_Fov%d.bmp", strModelName, nCurTrack, nCurDoc, nCurFOV);
-					strImagePath2Inspect = m_strDLTempFolder + strImagePath2Inspect;
-					CString Cname;
-					Cname.Format("%s_Track%d_Doc%d_Fov%d.bmp", strModelName, nCurTrack, nCurDoc, nCurFOV);
-					HTuple name = Cname;
-					SetCurrentDir(HTuple(m_strDLTempFolder));
-					WriteImage(m_DefectData[nCurDoc].EncapProcessedBackGround, "bmp", 0, name);
 
-				}
+				CString strImagePath2Inspect;
+				strImagePath2Inspect.Format("%s_Track%d_Doc%d_Fov%d.bmp", strModelName, nCurTrack, nCurDoc, nCurFOV);
+				strImagePath2Inspect = m_strDLTempFolder + strImagePath2Inspect;
+				SaveGrayScaleBMPFile(strImagePath2Inspect, *pImgBufSrc);
+
+
+
 				CString strDefectName = "";
 				int noOfDefectDL = 0;
 				if (pDeepLearningModule->m_nDeepLearningMode == 0) {

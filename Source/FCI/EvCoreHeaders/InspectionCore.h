@@ -497,9 +497,9 @@ struct DECLSPEC_LS3_IF CDefectData
 {
 	std::vector<CRect> arrayDefectRects;
 	std::vector<CPoint> arrayDefectCenters;
+
 	std::vector<std::vector<int>> arrayDefectX;
 	std::vector<std::vector<int>> arrayDefectY;
-	HImage	EncapProcessedBackGround;
 };
 
 typedef CArray<HRegion> HRegionArray;

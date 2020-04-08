@@ -118,7 +118,6 @@ public:
 
 	BOOL m_bEnableDLModelInspect;
 	BOOL m_bUseDLModelResult;
-	BOOL m_bRemoveBackGround;
 	CString m_strDLTempFolder;
 
 	void CleanDefectRegions();

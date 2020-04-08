@@ -307,7 +307,7 @@ public:
 	int m_nMinimumDiskSpaceImageSaveGB;//Minimum disk space free for Image Saving (Gigabytes)
 	BOOL m_bEnableDLModelInspect;
 	BOOL m_bUseDLModelResult;
-	BOOL m_bRemoveBackGround;
+
 	BOOL m_bAutoFocusingSequence;//Auto Focusing While Running Sequence
 
 	CString m_strCommOPC;
@@ -621,9 +621,6 @@ public:
 
 	afx_msg void OnInspAutoFocusingSequence(); 
 	afx_msg void OnUpdateInspAutoFocusingSequence(CCmdUI *pCmdUI);
-
-	afx_msg void OnOnlineRemoveBackGround();
-	afx_msg void OnUpdateOnlineRemoveBackGround(CCmdUI *pCmdUI);
 
 
 	afx_msg void OnOnlineContinueTopImageInsp();

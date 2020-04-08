@@ -3376,7 +3376,6 @@ int CAppDoc::InspectAllDocOnline(int nDeviceInsp, int nFovInsp)
 			CInspectionHandler* pInspHandler = &m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_InspectionHandler[nFovInsp];
 			pInspHandler->m_Inspection.m_bEnableDLModelInspect = m_pApp->m_bEnableDLModelInspect;
 			pInspHandler->m_Inspection.m_bUseDLModelResult = m_pApp->m_bUseDLModelResult;
-			pInspHandler->m_Inspection.m_bRemoveBackGround = m_pApp->m_bRemoveBackGround;
 			nErrInsp[nDoc] = pInspHandler->Inspect(&m_pTrack->m_SharedData,
 				&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_BufferDie[nDeviceInsp][nFovInsp],
 				&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_TeachBuffer[nFovInsp],
@@ -3543,11 +3542,12 @@ int CAppDoc::InspectAllDoc(int nError)
 					}
 				}
 
+				
+
 				CPerformanceTimer timer;
 				CInspectionHandler* pInspHandler = &m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_InspectionHandler[m_pTrack->m_nFOVIndex];
 				pInspHandler->m_Inspection.m_bEnableDLModelInspect = m_pApp->m_bEnableDLModelInspect;
 				pInspHandler->m_Inspection.m_bUseDLModelResult = m_pApp->m_bUseDLModelResult;
-				pInspHandler->m_Inspection.m_bRemoveBackGround = m_pApp->m_bRemoveBackGround;
 				nErrInsp[nDoc] = pInspHandler->Inspect(&m_pTrack->m_SharedData,
 													&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_Buffer,
 													&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_TeachBuffer[m_pTrack->m_nFOVIndex], 
@@ -3564,6 +3564,7 @@ int CAppDoc::InspectAllDoc(int nError)
 													m_pApp->m_bFwdDirectionForTiltInsp,
 													&m_pApp->m_DeepLearningModule,
 													strArrayInspValues);
+			
 				double dTime = timer.GetElapsedMSec();
 				OutputDebugLogTo(nTrack+1, TRUE,"[Image%d] RESULT: '%s'  (%3.2fms)", nDoc+1, pInspHandler->m_strErrorMsg, dTime);
 		

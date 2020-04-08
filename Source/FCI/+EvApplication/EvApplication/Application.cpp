@@ -94,9 +94,6 @@ BEGIN_MESSAGE_MAP(CApplication, CWinAppEx)
 	ON_COMMAND(ID_CHECK_SAVE_DL_FAIL_IMAGE, OnOnlineSaveDLFailImages)
 	ON_UPDATE_COMMAND_UI(ID_CHECK_SAVE_DL_FAIL_IMAGE, OnUpdateOnlineSaveDLFailImages)
 
-	ON_COMMAND(ID_REMOVE_BACK_GROUND, OnOnlineRemoveBackGround)
-	ON_UPDATE_COMMAND_UI(ID_REMOVE_BACK_GROUND, OnUpdateOnlineRemoveBackGround)
-	
 	ON_COMMAND(ID_ENABLE_DL_INSPECT, OnEnableDLModelInspect)
 	ON_UPDATE_COMMAND_UI(ID_ENABLE_DL_INSPECT, OnUpdateEnableDLModelInspect)
 
@@ -304,7 +301,6 @@ CApplication::CApplication()
 	m_nActiveTrackIdx = 0;
 	m_bReScanSequence = FALSE;
 	m_bCentralizedVerificationMode = FALSE;
-
 	m_bMultithreadInspectionMode = FALSE;
 
 	m_nCentralizedStationLatest = -1;
@@ -4966,15 +4962,7 @@ void CApplication::OnUpdateOnlineSaveDLFailImages(CCmdUI *pCmdUI)
 	pCmdUI->Enable(m_UserAccInfo.m_nCurrentAccessLevel >= m_AdvSecurityDlg.m_data.m_nSaveOnlineDLFailImages);
 	pCmdUI->SetCheck(m_bSaveDLFailImages);
 }
-void CApplication::OnOnlineRemoveBackGround() {
-	m_bRemoveBackGround = !m_bRemoveBackGround;
-}
 
-void CApplication::OnUpdateOnlineRemoveBackGround(CCmdUI *pCmdUI)
-{
-	pCmdUI->Enable(m_UserAccInfo.m_nCurrentAccessLevel >= m_AdvSecurityDlg.m_data.m_nSaveOnlineDLImages);
-	pCmdUI->SetCheck(m_bRemoveBackGround);
-}
 void CApplication::OnOnlineContinueTopImageInsp()
 {
 	m_bOnlineContinueTopImageInsp = !m_bOnlineContinueTopImageInsp;
