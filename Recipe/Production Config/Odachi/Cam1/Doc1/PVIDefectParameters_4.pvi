@@ -1,0 +1,126 @@
+[PVI Area]
+Count=2
+
+[PVIArea_1]
+Enable=1
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=2
+Device Mask Type=0
+Device Mask Type_1=0
+Device Mask Type_2=0
+Recheck Enable=1
+Min. Mean GV Diff=10
+Max Contrast=40
+TeachPviArea RectPos1Top=714
+TeachPviArea RectPos1Bot=1503
+TeachPviArea RectPos1Lft=0
+TeachPviArea RectPos1Rht=1192
+TeachPviAreaMaskRegion RectPos1Mask1Top=874
+TeachPviAreaMaskRegion RectPos1Mask1Bot=942
+TeachPviAreaMaskRegion RectPos1Mask1Lft=0
+TeachPviAreaMaskRegion RectPos1Mask1Rht=1196
+TeachPviAreaMaskRegion RectPos1Mask2Top=1274
+TeachPviAreaMaskRegion RectPos1Mask2Bot=1342
+TeachPviAreaMaskRegion RectPos1Mask2Lft=0
+TeachPviAreaMaskRegion RectPos1Mask2Rht=1198
+Defect Count=2
+
+[PVIArea_1_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_1_DefectsIndex]
+1=41111
+2=41112
+
+[PVIArea_1_Defects]
+41111=FM
+41112=Scratch
+
+[PVIArea_1_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=50
+MinSquareSize=50
+MinCount=1
+
+[PVIArea_1_Scratch]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=300
+MinSquareSize=15
+MinCount=1
+
+[PVIArea_2]
+Enable=1
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=3
+Device Mask Type=0
+Device Mask Type_1=0
+Device Mask Type_2=0
+Device Mask Type_3=0
+Recheck Enable=1
+Min. Mean GV Diff=10
+Max Contrast=40
+TeachPviArea RectPos2Top=715
+TeachPviArea RectPos2Bot=1504
+TeachPviArea RectPos2Lft=0
+TeachPviArea RectPos2Rht=1192
+TeachPviAreaMaskRegion RectPos2Mask1Top=1341
+TeachPviAreaMaskRegion RectPos2Mask1Bot=1505
+TeachPviAreaMaskRegion RectPos2Mask1Lft=0
+TeachPviAreaMaskRegion RectPos2Mask1Rht=1194
+TeachPviAreaMaskRegion RectPos2Mask2Top=940
+TeachPviAreaMaskRegion RectPos2Mask2Bot=1275
+TeachPviAreaMaskRegion RectPos2Mask2Lft=0
+TeachPviAreaMaskRegion RectPos2Mask2Rht=1195
+TeachPviAreaMaskRegion RectPos2Mask3Top=714
+TeachPviAreaMaskRegion RectPos2Mask3Bot=876
+TeachPviAreaMaskRegion RectPos2Mask3Lft=0
+TeachPviAreaMaskRegion RectPos2Mask3Rht=1196
+Defect Count=2
+
+[PVIArea_2_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=2.800000e+01
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_2_DefectsIndex]
+1=41121
+2=41122
+
+[PVIArea_2_Defects]
+41121=Scratch
+41122=FM
+
+[PVIArea_2_Scratch]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=300
+MinSquareSize=15
+MinCount=1
+
+[PVIArea_2_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=50
+MinLength=30
+MinSquareSize=30
+MinCount=1
+

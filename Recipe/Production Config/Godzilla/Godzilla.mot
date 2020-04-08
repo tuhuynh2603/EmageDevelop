@@ -1,0 +1,26 @@
+[Motor Setting]
+CurrentPos1(pps)=0
+Velocity1_Home(pps)=8192
+Velocity1_Move(pps)=163840
+StepSize1(pps)=3276
+Forward Home1=1
+Forward Move1=0
+CurrentPos2(pps)=0
+Velocity2_Home(pps)=8192
+Velocity2_Move(pps)=150000
+StepSize2(pps)=3276
+Forward Home2=1
+Forward Move2=0
+CurrentPos3(pps)=0
+Velocity3_Home(pps)=8192
+Velocity3_Move(pps)=105000
+StepSize3(pps)=136
+Forward Home3=1
+Forward Move3=0
+CurrentPos4(pps)=0
+Velocity4_Home(pps)=8192
+Velocity4_Move(pps)=105000
+StepSize4(pps)=2730
+Forward Home4=0
+Forward Move4=1
+

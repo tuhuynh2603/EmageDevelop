@@ -1,0 +1,14 @@
+[Device Config]
+No. Of Block[X]=1
+Block Pitch[X]=0.000000e+00
+Device No. Per Block[X]=1
+Device Pitch[X]=0.000000e+00
+Device Scan Area[X]=4.300000e+01
+Device Overlap[X]=1.000000e-01
+No. Of Block[Y]=1
+Block Pitch[Y]=0.000000e+00
+Device No. Per Block[Y]=3
+Device Pitch[Y]=1.464000e+01
+Device Scan Area[Y]=1.000000e+01
+Device Overlap[Y]=0.000000e+00
+

@@ -1594,10 +1594,10 @@ int CAppDoc::Teach()
 					m_pApp->m_pInfoMsgDlg->ShowWindow(TRUE);
 			}
 
-			//CString* strTemp = new CString;
-			//strTemp->Format("%d%d", nDoc, nFOV);
-			//m_pApp->m_pMainWnd->SendMessageA(WM_SET_CUR_POS_PARAM_DISP, (WPARAM)nTrack, (LPARAM)strTemp);
-			//delete strTemp;
+			CString* strTemp = new CString;
+			strTemp->Format("%d%d", nDoc, nFOV);
+			m_pApp->m_pMainWnd->SendMessageA(WM_SET_CUR_POS_PARAM_DISP, (WPARAM)nTrack, (LPARAM)strTemp);
+			delete strTemp;
 
 			pInspHandler = &m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_InspectionHandler[nFOV];
 			pData = &pInspHandler->m_Inspection.m_TrainingData;
@@ -1821,7 +1821,6 @@ int CAppDoc::Teach()
 				pData->bEnableAutoFocusSequence = TRUE;
 
 				rectTemp = CRect(2048 / 2 - 250, 2048 / 2 - 250, 2048 / 2 + 250, 2048 / 2 + 250);
-
 
 				if (pData->m_rectAutoFocusROI.Width() != 0)
 					rectTemp = pData->m_rectAutoFocusROI;
@@ -2141,199 +2140,7 @@ int CAppDoc::Teach()
 
 
 
-			/////////////
-			/////////////Encap magnus begin
-			/////////////////end encap magnus
-			/////////////
-			/////////////
-			if (pInspHandler->m_Inspection.m_TrainingData.bEnable_EncapManus)
-			{
-				
-
-				nError = pInspHandler->Teach(&m_pTrack->m_SharedData,//&m_ImageViewInfo,
-					&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_Buffer,
-					m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir,
-					m_pApp->m_strConfigFile,
-					14,
-					bEnableRgn,
-					FALSE,
-					nTrack,
-					nDoc,
-					nFOV + 1,
-					m_nNoOfFov,
-					pDataFirst,
-					pCalibData,
-					FALSE);
-
-				if (!nError) {
-					//pInspHandler->SetPVIDefectParameters(m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir, nFOV);
-				//	pInspHandler->SaveTeachParameters(m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir, m_pApp->m_strConfigFile, nFOV);
-				}
-				else if (nError) {
-					strInfoMsg = strInfoMsg + " - Error: Encap Bottom Magnus device location";
-
-					AfxMessageBox("Teach Failed At " + strInfoMsg);
-					m_pApp->AddLogEvent("Teach Process Aborted");
-					UpdateStatusBar(&CString("Teach Process Aborted"));
-					ZoomSelectedDocView(nDocFrame);
-					DrawView();
-					if (m_pApp->m_pInfoMsgDlg) {
-						if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-							m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-					}
-					return -1;
-				}
-
-					ZoomSelectedDocView(nDocFrame);
-					bTempMsgRgnYes[1] = TRUE;
-					bEnableRgn[2] = TRUE;
-					CRect rectTempEncap = CRect(100, 100, 400, 400);
-					///////// Get crop encap magnus
-
-					if (pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus.Width() >0 && 
-						pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus.Height()>0)
-						rectTempEncap = pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus;
-
-					ZoomSelectedDocView(nDocFrame, TRUE);
-					DrwTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, &rectTempEncap);
-					DrwUpdate(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo);
-
-					strStatusBarMsg.Format("Locate Encap Location Magnus ");
-					//UpdateStatusBar(&strStatusBarMsg);
-					m_pApp->UpdateInfoMsgDlg(strInfoMsg, strStatusBarMsg);
-
-					if (!WaitResponse(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo))
-						rectTempEncap = GetTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, 0);// nRectTempIndexRgn[nDoc]++);
-					else {
-						m_pApp->AddLogEvent("Teach Process Aborted");
-						UpdateStatusBar(&CString("Teach Process Aborted"));
-						if (m_pApp->m_pInfoMsgDlg) {
-							if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-								m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-						}
-						ZoomSelectedDocView(nDocFrame);
-						return -1;
-					}
-
-
-					///////////// ///////// Get crop smooth encap magnus
-					//if (pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus.Width() != 0)
-					//	rectTempEncap = pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus;
-					CRect rectTempEncap2 = CRect(100, 100, 400, 400);
-					if (pInspHandler->m_Inspection.m_TrainingData.hRect_CropSmoothEncap_magnus.Width() >0
-						&& pInspHandler->m_Inspection.m_TrainingData.hRect_CropSmoothEncap_magnus.Height()>0)
-						rectTempEncap2 = pInspHandler->m_Inspection.m_TrainingData.hRect_CropSmoothEncap_magnus;
-
-					ZoomSelectedDocView(nDocFrame, TRUE);
-					DrwTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, &rectTempEncap2);
-					DrwUpdate(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo);
-
-					strStatusBarMsg.Format("Locate Encap Crop Smooth Location Magnus");
-					//UpdateStatusBar(&strStatusBarMsg);
-					m_pApp->UpdateInfoMsgDlg(strInfoMsg, strStatusBarMsg);
-
-					if (!WaitResponse(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo))
-						rectTempEncap2 = GetTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, 1);// nRectTempIndexRgn[nDoc]++);
-					else {
-						m_pApp->AddLogEvent("Teach Process Aborted");
-						UpdateStatusBar(&CString("Teach Process Aborted"));
-						if (m_pApp->m_pInfoMsgDlg) {
-							if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-								m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-						}
-						ZoomSelectedDocView(nDocFrame);
-						return -1;
-					}
-
-					///////////////
-					///////////////
-					CRect rectTempEncap3 = CRect(100, 100, 400, 400);
-					if (pInspHandler->m_Inspection.m_TrainingData.hRect_CropSmoothEncap_magnus.Width() > 0
-						&& pInspHandler->m_Inspection.m_TrainingData.hRect_CropRemoveBlackLine_magnus.Height() > 0)
-						rectTempEncap3 = pInspHandler->m_Inspection.m_TrainingData.hRect_CropRemoveBlackLine_magnus;
-
-					ZoomSelectedDocView(nDocFrame, TRUE);
-					DrwTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, &rectTempEncap3);
-					DrwUpdate(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo);
-
-					strStatusBarMsg.Format("Locate Remove Black Line Location Magnus");
-					//UpdateStatusBar(&strStatusBarMsg);
-					m_pApp->UpdateInfoMsgDlg(strInfoMsg, strStatusBarMsg);
-
-					if (!WaitResponse(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo))
-						rectTempEncap3 = GetTrackRect(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, 2);// nRectTempIndexRgn[nDoc]++);
-					else {
-						m_pApp->AddLogEvent("Teach Process Aborted");
-						UpdateStatusBar(&CString("Teach Process Aborted"));
-						if (m_pApp->m_pInfoMsgDlg) {
-							if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-								m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-						}
-						ZoomSelectedDocView(nDocFrame);
-						return -1;
-					}
-
-					if (rectTempEncap.Height() > 0 && rectTempEncap2.Height() > 0 && rectTempEncap3.Height() > 0)
-					{
-						pInspHandler->m_Inspection.m_TrainingData.hRect_EncapLocation_magnus = rectTempEncap;
-						pInspHandler->m_Inspection.m_TrainingData.hRect_CropSmoothEncap_magnus = rectTempEncap2;
-						pInspHandler->m_Inspection.m_TrainingData.hRect_CropRemoveBlackLine_magnus = rectTempEncap3;
-					}
-					/// encap bottom tracing magnus
-					nError = pInspHandler->Teach(&m_pTrack->m_SharedData,//&m_ImageViewInfo,
-						&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_Buffer,
-						m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir,
-						m_pApp->m_strConfigFile,
-						15,
-						bEnableRgn,
-						FALSE,
-						nTrack,
-						nDoc,
-						nFOV + 1,
-						m_nNoOfFov,
-						pDataFirst,
-						pCalibData,
-						FALSE);
-					if (!nError) {
-						pInspHandler->SaveTeachParameters(m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir, m_pApp->m_strConfigFile, nFOV);
-
-						strStatusBarMsg.Format("Regions found");
-						m_pApp->UpdateInfoMsgDlg(strInfoMsg, strStatusBarMsg);
-						if (WaitResponse(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo)) {
-							m_pApp->AddLogEvent("Teach Process Aborted");
-							UpdateStatusBar(&CString("Teach Process Aborted"));
-							if (m_pApp->m_pInfoMsgDlg) {
-								if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-									m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-							}
-							ZoomSelectedDocView(nDocFrame);
-							return -1;
-						}
-					}
-					else if (nError) {
-						strInfoMsg = strInfoMsg + " - Error: Encap Location Teaching Magnus";
-
-						AfxMessageBox("Teach Failed At " + strInfoMsg);
-						m_pApp->AddLogEvent("Teach Process Aborted");
-						UpdateStatusBar(&CString("Teach Process Aborted"));
-						ZoomSelectedDocView(nDocFrame);
-						DrawView();
-						if (m_pApp->m_pInfoMsgDlg) {
-							if (m_pApp->m_pInfoMsgDlg->IsWindowVisible())
-								m_pApp->m_pInfoMsgDlg->ShowWindow(FALSE);
-						}
-						return -1;
-					}
-
-
-			}
-
-			///////////////////////
-			/////////////////////
-			////////////////////////   Encap region
-
-			if (pInspHandler->m_Inspection.m_TrainingData.bEnableEncap) 
-			{
+			if (pInspHandler->m_Inspection.m_TrainingData.bEnableEncap) {
 				ZoomSelectedDocView(nDocFrame);
 				bTempMsgRgnYes[1] = TRUE;
 				bEnableRgn[2] = TRUE;
@@ -2450,12 +2257,12 @@ int CAppDoc::Teach()
 				nError = pInspHandler->Teach(&m_pTrack->m_SharedData,//&m_ImageViewInfo,
 					&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_Buffer,
 					m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_strConfigDir,
-					m_pApp->m_strConfigFile,	
+					m_pApp->m_strConfigFile,
 					2,
 					bEnableRgn,
 					FALSE,
 					nTrack,
-					nDoc,	
+					nDoc,
 					nFOV + 1,
 					m_nNoOfFov,
 					pDataFirst,
@@ -2496,7 +2303,6 @@ int CAppDoc::Teach()
 
 				//// ---- encap teach ---- ////
 				//DrawView(FALSE);
-
 				BOOL bEnableEncapLoc = FALSE;
 				if (pInspHandler->m_Inspection.m_TrainingData.bEnableEncap) {
 					int nRectTempIndexEncap = 0;
@@ -3587,6 +3393,7 @@ int CAppDoc::InspectAllDocOnline(int nDeviceInsp, int nFovInsp)
 				m_pApp->m_bFwdDirectionForTiltInsp,
 				&m_pApp->m_DeepLearningModule,
 				strArrayInspValues);
+
 			double dTime = timer.GetElapsedMSec();
 			OutputDebugLogTo(nTrack + 1, TRUE, "[Image%d] RESULT: '%s'  (%3.2fms)", nDoc + 1, pInspHandler->m_strErrorMsg, dTime);	
 		}
@@ -3597,30 +3404,8 @@ int CAppDoc::InspectAllDocOnline(int nDeviceInsp, int nFovInsp)
 		m_strLogInspectionData.Add(strArrayInspValues.GetAt(nCount));
 	SetEvent(m_EventLogInspectionData);
 	
-
-
-
-
 	nError = GOOD_UNIT;
 	for (int nDoc = 0; nDoc < m_pApp->m_nTotalViewDocs[nTrack]; nDoc++) {
-
-		CInspectionHandler* pInspHandler = &m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_InspectionHandler[m_pTrack->m_nFOVIndex];
-		for (int j = 0; j < pInspHandler->m_Inspection.m_arrayOverlayInspection.GetCount(); j++) {
-			if (!pInspHandler->m_Inspection.m_arrayOverlayInspection[j].hImage.IsInitialized() && nErrInsp[nDoc] != -NO_IMAGE)
-			{
-				DrawRegion(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo,
-						pInspHandler->m_Inspection.m_arrayOverlayInspection[j]);
-				LOGPEN TextColorGreen;
-				TextColorGreen.lopnColor = RGB(50, 230, 50);
-				TextColorGreen.lopnStyle = PS_SOLID;
-				TextColorGreen.lopnWidth.x = 1;
-				CString strDefectMsg = "PASS";//.Format(" PASS");
-				//for(int i=0; i<m_pApp->m_nTotalTracks; i++)
-				DrwStr(&m_pApp->m_pTracks[nTrack].m_pDoc[nDoc]->m_ImageViewInfo, &strDefectMsg, &CPoint(180, 20), &TextColorGreen, 120);
-			}
-
-		}
-
 		if (nError == GOOD_UNIT) {
 			if (nErrInsp[nDoc] < GOOD_UNIT)
 				nError = nErrInsp[nDoc];
@@ -3779,8 +3564,6 @@ int CAppDoc::InspectAllDoc(int nError)
 													m_pApp->m_bFwdDirectionForTiltInsp,
 													&m_pApp->m_DeepLearningModule,
 													strArrayInspValues);
-				
-				DrawView(TRUE);
 				double dTime = timer.GetElapsedMSec();
 				OutputDebugLogTo(nTrack+1, TRUE,"[Image%d] RESULT: '%s'  (%3.2fms)", nDoc+1, pInspHandler->m_strErrorMsg, dTime);
 		

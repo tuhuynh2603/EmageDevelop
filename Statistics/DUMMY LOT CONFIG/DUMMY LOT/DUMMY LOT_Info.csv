@@ -16899,3 +16899,88 @@ LOT SUMMARY
 ,,,04-05-2020,21:43:12,1142599005,3,0,PASS,0,PASS
 ,,,04-05-2020,21:43:12,1142599005,4,0,PASS,0,PASS
 
+
+
+LOT SUMMARY
+----------------------
+ Lot ID,,[]
+ Recipe Name,,
+ Machine ID  Hvfa 1
+ Start Date  04-07-2020
+-----------------------------------
+
+
+,,,Date,Time,MID,FOV,FOV Fail Code,FOV Fail Defect Name,Die Fail Code,Die Fail Defect Name
+,,,04-07-2020,21:34:21,1142598975,1,1, ,3,Device Location 
+,,,04-07-2020,21:34:21,1142598975,2,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:21,1142598975,3,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:21,1142598975,4,3,Device Location ,3,Device Location 
+
+
+
+LOT SUMMARY
+----------------------
+ Lot ID,,[]
+ Recipe Name,,
+ Machine ID  Hvfa 1
+ Start Date  04-07-2020
+-----------------------------------
+
+
+,,,Date,Time,MID,FOV,FOV Fail Code,FOV Fail Defect Name,Die Fail Code,Die Fail Defect Name
+,,,04-07-2020,21:34:23,1142598975,1,1, ,3,Device Location 
+,,,04-07-2020,21:34:23,1142598975,2,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:23,1142598975,3,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:23,1142598975,4,3,Device Location ,3,Device Location 
+
+
+
+LOT SUMMARY
+----------------------
+ Lot ID,,[]
+ Recipe Name,,
+ Machine ID  Hvfa 1
+ Start Date  04-07-2020
+-----------------------------------
+
+
+,,,Date,Time,MID,FOV,FOV Fail Code,FOV Fail Defect Name,Die Fail Code,Die Fail Defect Name
+,,,04-07-2020,21:34:26,1142598976,1,1, ,3,Device Location 
+,,,04-07-2020,21:34:26,1142598976,2,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:26,1142598976,3,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:26,1142598976,4,3,Device Location ,3,Device Location 
+
+
+
+LOT SUMMARY
+----------------------
+ Lot ID,,[]
+ Recipe Name,,
+ Machine ID  Hvfa 1
+ Start Date  04-07-2020
+-----------------------------------
+
+
+,,,Date,Time,MID,FOV,FOV Fail Code,FOV Fail Defect Name,Die Fail Code,Die Fail Defect Name
+,,,04-07-2020,21:34:30,1142598979,1,1, ,3,Device Location 
+,,,04-07-2020,21:34:30,1142598979,2,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:30,1142598979,3,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:30,1142598979,4,3,Device Location ,3,Device Location 
+
+
+
+LOT SUMMARY
+----------------------
+ Lot ID,,[]
+ Recipe Name,,
+ Machine ID  Hvfa 1
+ Start Date  04-07-2020
+-----------------------------------
+
+
+,,,Date,Time,MID,FOV,FOV Fail Code,FOV Fail Defect Name,Die Fail Code,Die Fail Defect Name
+,,,04-07-2020,21:34:34,1142598980,1,1, ,3,Device Location 
+,,,04-07-2020,21:34:34,1142598980,2,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:34,1142598980,3,3,Device Location ,3,Device Location 
+,,,04-07-2020,21:34:34,1142598980,4,3,Device Location ,3,Device Location 
+

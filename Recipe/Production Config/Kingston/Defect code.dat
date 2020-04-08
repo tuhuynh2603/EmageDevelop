@@ -1,0 +1,116 @@
+[Good unit]
+Color=1369620
+Error Code=0
+
+[Not inspected]
+Color=4210752
+Error Code=1
+
+[Unknown defect]
+Color=255
+Error Code=2
+
+[Device Location]
+Color=65535
+Error Code=3
+
+[Tilt Inspection]
+Color=15780518
+Error Code=4
+
+[Cover Layer Inspection]
+Color=16777215
+Error Code=3
+
+[Cover Layer Alignment]
+Color=16777215
+Error Code=3
+
+[Encap Insufficient]
+Color=16711680
+Error Code=10
+
+[Encap Excess]
+Color=16711680
+Error Code=10
+
+[Encap Crack]
+Color=16711680
+Error Code=11
+
+[Encap Blow Hole]
+Color=16711680
+Error Code=11
+
+[Encap Contamination]
+Color=16711680
+Error Code=11
+
+[Slot]
+Color=16776960
+Error Code=40
+
+[Die Edge]
+Color=65535
+Error Code=5
+
+[Top Die_FM]
+Color=16711935
+Error Code=20
+
+[Top Die_Scratch]
+Color=16711935
+Error Code=20
+
+[Top EnCap_FM]
+Color=16711935
+Error Code=20
+
+[Top EnCap_Scratch]
+Color=16711935
+Error Code=20
+
+[Top Slot_FM]
+Color=16711935
+Error Code=20
+
+[Top Slot_Scratch]
+Color=16711935
+Error Code=20
+
+[Bottom Die_Slot]
+Color=16776960
+Error Code=40
+
+[Bottom Die_Scratch]
+Color=16776960
+Error Code=40
+
+[Bottom Die_FM]
+Color=16776960
+Error Code=40
+
+[Bottom EnCap_FM]
+Color=16776960
+Error Code=40
+
+[Bottom Cover Layer_CVL Waste]
+Color=16776960
+Error Code=30
+
+[Top Die_SU8 Edge]
+Color=4537107
+Error Code=SU8 Edge
+
+[Bottom Die_Chip Off]
+Color=4537107
+Error Code=Chip Off
+
+[Bottom Die_Missing Slot]
+Color=4537107
+Error Code=Missing Slot
+
+[Bottom Die_SU8 Edge]
+Color=4537107
+Error Code=SU8 Edge
+

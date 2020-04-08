@@ -1,0 +1,127 @@
+[PVI Area]
+Count=2
+
+[PVIArea_1]
+Enable=0
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=0
+Device Mask Type=0
+Recheck Enable=0
+Min. Mean GV Diff=10
+Max Contrast=40
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos1Top=1028
+TeachPviArea RectPos1Bot=1057
+TeachPviArea RectPos1Lft=1027
+TeachPviArea RectPos1Rht=1056
+TeachPviArea Polygon Point Count1=3
+TeachPviArea PolygonPos1Point1X=700
+TeachPviArea PolygonPos1Point1Y=700
+TeachPviArea PolygonPos1Point2X=750
+TeachPviArea PolygonPos1Point2Y=700
+TeachPviArea PolygonPos1Point3X=800
+TeachPviArea PolygonPos1Point3Y=700
+Defect Count=2
+
+[PVIArea_1_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_1_DefectsIndex]
+1=41211
+2=41212
+
+[PVIArea_1_Defects]
+41211=FM
+41212=Scratch
+
+[PVIArea_1_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=80
+MinLength=30
+MinSquareSize=30
+MinCount=1
+
+[PVIArea_1_Scratch]
+Enable=0
+DefectCharacteristics=0
+Size=100
+Contrast=100
+MinLength=500
+MinSquareSize=20
+MinCount=1
+
+[PVIArea_2]
+Enable=0
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=0
+Device Mask Type=0
+Recheck Enable=0
+Min. Mean GV Diff=10
+Max Contrast=40
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos2Top=1296
+TeachPviArea RectPos2Bot=1304
+TeachPviArea RectPos2Lft=0
+TeachPviArea RectPos2Rht=1114
+TeachPviArea Polygon Point Count2=3
+TeachPviArea PolygonPos2Point1X=700
+TeachPviArea PolygonPos2Point1Y=700
+TeachPviArea PolygonPos2Point2X=750
+TeachPviArea PolygonPos2Point2Y=700
+TeachPviArea PolygonPos2Point3X=800
+TeachPviArea PolygonPos2Point3Y=700
+Defect Count=2
+
+[PVIArea_2_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+
+[PVIArea_2_DefectsIndex]
+1=41221
+2=41222
+
+[PVIArea_2_Defects]
+41221=FM
+41222=Scratch
+
+[PVIArea_2_FM]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=80
+MinLength=30
+MinSquareSize=30
+MinCount=1
+
+[PVIArea_2_Scratch]
+Enable=1
+DefectCharacteristics=0
+Size=100
+Contrast=80
+MinLength=300
+MinSquareSize=20
+MinCount=1
+

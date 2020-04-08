@@ -1,0 +1,11 @@
+[Camera Setting]
+rectAoiTop=0
+rectAoiBot=2048
+rectAoiLft=0
+rectAoiRht=2048
+Exposure=500
+Gain1=10
+Gain2=10
+Gain3=10
+BlackLevel=0
+

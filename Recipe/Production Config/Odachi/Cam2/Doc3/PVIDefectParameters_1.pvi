@@ -1,0 +1,26 @@
+[PVI Area]
+Count=1
+
+[PVIArea_1]
+Enable=0
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=0
+Device Mask Type=0
+Recheck Enable=0
+Min. Mean GV Diff=10
+Max Contrast=40
+TeachPviArea RectPos1Top=936
+TeachPviArea RectPos1Bot=1237
+TeachPviArea RectPos1Lft=928
+TeachPviArea RectPos1Rht=1229
+Defect Count=0
+
+[PVIArea_1_Edge]
+Enable=0
+Min Contrast=60
+Max Contrast=255
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=0.000000e+00
+

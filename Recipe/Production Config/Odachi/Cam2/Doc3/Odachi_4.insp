@@ -1,0 +1,107 @@
+[Cover Layer]
+Enable=0
+
+[Cover Layer :: Cover Layer 1]
+Max. Intensity=165
+Min. Length=5500
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=2.500000e+01
+Gap Height Tolerance=5.500000e+00
+
+[Cover Layer :: Cover Layer 2]
+Max. Intensity=165
+Min. Length=5500
+Min. Height=2000
+Mask Size=2.500000e+01
+Gap Width Tolerance=5.500000e+00
+Gap Height Tolerance=2.500000e+01
+
+[Cover Layer :: Cover Layer 3]
+Max. Intensity=165
+Min. Length=5000
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=2.500000e+01
+Gap Height Tolerance=5.500000e+00
+
+[Cover Layer :: Cover Layer 4]
+Max. Intensity=165
+Min. Length=5500
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=2.500000e+01
+Gap Height Tolerance=5.500000e+00
+
+[Cover Layer :: Cover Layer 5]
+Max. Intensity=165
+Min. Length=8500
+Min. Height=165
+Mask Size=2.500000e+01
+Gap Width Tolerance=5.500000e+00
+Gap Height Tolerance=1.000000e+02
+
+[Cover Layer Alignment]
+Enable=0
+
+[Cover Layer Alignment :: Pointer 1]
+Cover Layer Dir=1
+Tolerance=1.800000e+02
+
+[Cover Layer Alignment :: Pointer 2]
+Cover Layer Dir=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 3]
+Cover Layer Dir=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 4]
+Cover Layer Dir=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 5]
+Cover Layer Dir=0
+Tolerance=1.100000e+02
+
+[Cover Layer Alignment :: Pointer 6]
+Cover Layer Dir=0
+Tolerance=1.100000e+02
+
+[Encap]
+Enable=0
+Enable Encap Surface=0
+Edge Offset=3.500000e+00
+Contrast=60
+Min. Area=16
+
+[Encap :: Blow Hole]
+Min. Circularity=5.000000e-01
+Min. Length=10
+Min. Square Size=12
+Max. Intensity=100
+
+[Encap :: Contamination]
+Min. Circularity=5.000000e-01
+Min. Length=10
+Min. Square Size=12
+
+[Tilt]
+Enable=0
+Object Intensity=0
+Measuring Width=20
+
+[Die Edge]
+Enable=0
+Insp Offset=0.000000e+00
+Insp Width=0.000000e+00
+Defect Characteristics=0
+Contrast=80
+Min Size=3000
+Min Length=275
+Min SquareSize=110
+Min Count=1
+Recheck Enable=0
+Min. Mean GV Diff=10
+Max Contrast=40
+

@@ -186,20 +186,7 @@ CDieEdge::CDieEdge() : CParameterCore("Die Edge", "DieEdge", -DIE_EDGE)
 	dOffset = 0;
 	dWidth = 0;
 }
-CEncapMagnus::CEncapMagnus() : CParameterCore("Encap Magnus", "EncapMagnus", -ENCAP_MAGNUS)
-{
-	bEnable = FALSE;
-	Thresh[0]=40;
-	Thresh[1] = 220;
-	Crop_Expand[0]=220;
-	Crop_Expand[1] = 220;
-	Dilate_Kernel[0] = 7;
-	Dilate_Kernel[1] = 1;
-	Opening_Kernel[0]=1;
-	Opening_Kernel[1]=7;
-	Crop_Smooth=151;
-	Area_Object=999999;
-}
+
 
 CTrainingData::CTrainingData()
 {
@@ -348,47 +335,7 @@ CTrainingData::CTrainingData()
 		m_rectMaskSlot[k] = CRect(0, 0, 0, 0);
 	}
 	
-	//////Bottom encap magnus 
-	bEnable_EncapManus = FALSE;
-	nThreshMin_EncapManus = 140;
-	nThreshMax_EncapManus = 255;
-	nThreshMin_Black_EncapManus=0;
-	nThreshMax_Black_EncapManus=35;
-	nThreshMin_White_EncapManus=220;
-	nThreshMax_White_EncapManus=255;
 
-	for (int i = 0; i <= 1; i++)
-	{
-		nCrop_ExpandLeft_magnus[i] = 200;
-		nCrop_ExpandRight_magnus[i] = 200;
-		nCrop_ExpandHeight_magnus[i] = 200;
-		nCrop_Smooth_EncapManus[i] = 30;
-
-		nCrop_RemoveBLLeft_magnus[i] = 200;
-		nCrop_RemoveBLRight_magnus[i] = 200;
-		nCrop_RemoveBLHeight_magnus[i] = 30;
-	}
-
-	hRect_DeviceLocationEncap_magnus = CRect(0,0,0,0);
-	hRect_EncapLocation_magnus = CRect(0, 0, 0, 0);
-	hRect_CropSmoothEncap_magnus = CRect(0, 0, 0, 0);	
-	hRect_CropNoSmoothEncap_magnus = CRect(0, 0, 0, 0);
-	hRect_CropRemoveBlackLine_magnus = CRect(0, 0, 0, 0);
-
-
-	nDilateX_EncapManus = 1;
-	nDilateY_EncapManus = 10;
-
-	nOpeningX_EncapManus = 10;
-	nOpeningY_EncapManus = 1;
-	nValue_OpeningCircle_magnus = 10;
-	nValue_OpeningCircleCrop_magnus = 10;
-
-	nValue_Smooth_EncapMagnus = 75;
-	nArea_Object_EncapManus = 999999;
-	nHeight_Object_magnus = 1300;
-	nWidth_Object_magnus = 1100;
-	////
 // Tilt Teach //
 	m_rectTilt = CRect(0, 0, 0, 0);
 
@@ -429,12 +376,6 @@ CTrainingData::CTrainingData()
 		str.Format("[Inspection::Initialize] %s", ex.ErrorMessage().Text());
 		LogMessage(9, str);
 	}
-
-
-
-
-
-
 	catch (...) {}
 }
 
@@ -536,7 +477,6 @@ int CInspectionCore::Teach(HImage hImages,
 	COLORREF colorBlack = RGB(0, 0, 0);
 	int nStepDebug = 0;
 
-
 	if(!nTeachStep) {
 		m_arrayOverlayTeach.RemoveAll();
 
@@ -588,7 +528,6 @@ int CInspectionCore::Teach(HImage hImages,
 		HTuple hDeviceEdgeDetectionEnable, hDeviceHorizontalContrast, hDeviceHorizontalDirection, hDeviceVerticalContrast, hDeviceVerticalDirection;
 		HTuple hDeviceEdgeLocationTeachRows, hDeviceEdgeLocationTeachCols;
 		HTuple hDeviceEdgeDetectionSmoothingImage;
-
 
 		hDeviceLocationEnable = m_TrainingData.bDeviceLocationEnable;
 		hNoOfLocationRegions = m_TrainingData.nNoOfLocationTeachRegion;
@@ -676,7 +615,6 @@ int CInspectionCore::Teach(HImage hImages,
 			m_arrayOverlayTeach.Add(hAutoFocusRoi, colorRed);
 
 			HObject hLine;
-
 			GenRegionLine(&hLine, hRow1, hCol1 + hWidth / 2, hRow2, hCol1 + hWidth / 2);
 			m_arrayOverlayTeach.Add(hLine, colorRed);
 			GenRegionLine(&hLine, hRow1 + hHeight / 2, hCol1, hRow1 + hHeight / 2, hCol2);
@@ -786,297 +724,7 @@ int CInspectionCore::Teach(HImage hImages,
 		m_TrainingData.hvec_TupleVectorLocation.SetAt(nIndex++, hDeviceEdgeDetectionSmoothingImage);
 
 	}
-
-	//////////////////////////////////////
-	////////Encap Bottom Magnus///////////
-	//////////////////////////////////////
-	else if (nTeachStep == 14)
-	{
-
-		// get Two Point Encap Location////////
-
-		int nThresh_Min_magnus = m_TrainingData.nThreshMin_EncapManus;
-		int nThresh_Max_magnus = m_TrainingData.nThreshMax_EncapManus;
-		int nArea_Object_magnus = m_TrainingData.nArea_Object_EncapManus;
-		int nHeight_Object_magnus = m_TrainingData.nHeight_Object_magnus;
-		int nWidth_Object_magnus = m_TrainingData.nWidth_Object_magnus;
-		HRegion hThreshold_Region_magnus;
-		HObject hDeviceLocation_magnus, hSelect_DeviceLocation_magnus;
-		HTuple hDefectInfo_magnus;
-
-		Threshold(hImages, &hThreshold_Region_magnus, nThresh_Min_magnus, nThresh_Max_magnus);
-		Connection(hThreshold_Region_magnus, &hDeviceLocation_magnus);
-	//	SelectShape(hDeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "area", "and", nArea_Object_magnus, 9999999);
-		SelectShape(hDeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "height", "and", nHeight_Object_magnus, nHeight_Object_magnus + 400);
-		SelectShape(hSelect_DeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "width", "and", nWidth_Object_magnus, nWidth_Object_magnus + 400);
-
-		HRegion hSelect_DeviceLocation_obj_magnus;
-		SelectObj(hSelect_DeviceLocation_magnus, &hSelect_DeviceLocation_obj_magnus, 1);
-
-		HRegion hBoundary_DeviceLocation_magnus;
-		Boundary(hSelect_DeviceLocation_magnus, &hBoundary_DeviceLocation_magnus, "inner");
-		HTuple hRows_Device_magnus, hCols_Device_magnus;
-		GetRegionPoints(hBoundary_DeviceLocation_magnus, &hRows_Device_magnus, &hCols_Device_magnus);
-
-		HTuple  nbottom_DeviceLocationEncap_magnus,
-				ntop_DeviceLocationEncap_magnus,
-				nright_DeviceLocationEncap_magnus,
-				nleft_DeviceLocationEncap_magnus;
-		TupleMax(hRows_Device_magnus, &nbottom_DeviceLocationEncap_magnus);
-		TupleMin(hRows_Device_magnus, &ntop_DeviceLocationEncap_magnus);
-		TupleMax(hCols_Device_magnus, &nright_DeviceLocationEncap_magnus);
-		TupleMin(hCols_Device_magnus, &nleft_DeviceLocationEncap_magnus);
-
-		HTuple nImage_Width, nImage_Height;
-		GetImageSize(hImages, &nImage_Width, &nImage_Height);
-		m_TrainingData.hRect_DeviceLocationEncap_magnus= CRect( nleft_DeviceLocationEncap_magnus,
-																ntop_DeviceLocationEncap_magnus,
-																nright_DeviceLocationEncap_magnus,
-																nbottom_DeviceLocationEncap_magnus);
-
-		m_TrainingData.hRect_CropRemoveBlackLine_magnus = m_TrainingData.hRect_DeviceLocationEncap_magnus;
-
-		//int nEncapLocation_Height = m_TrainingData.hRect_EncapLocation_magnus.Height();
-		//int nEncapLocation_Width = m_TrainingData.hRect_EncapLocation_magnus.Width();
-
-		
-
-
-		//////////// Get rectangle encap bottom//////////////////
-		if (nFOV==1)// top
-		{
-			if ((int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[0] > 0)
-				m_TrainingData.hRect_EncapLocation_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[0];
-			else m_TrainingData.hRect_EncapLocation_magnus.left = 0;
-			if ((int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[0] < nImage_Width)
-				m_TrainingData.hRect_EncapLocation_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[0];
-			else m_TrainingData.hRect_EncapLocation_magnus.right = (int)nImage_Width;
-
-			m_TrainingData.hRect_EncapLocation_magnus.bottom = (int)ntop_DeviceLocationEncap_magnus;
-			if (ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0] > 0
-				&& ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0] < (int)nImage_Height)
-			m_TrainingData.hRect_EncapLocation_magnus.top = (int)ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0];
-			else m_TrainingData.hRect_EncapLocation_magnus.top = 0;
-
-			m_TrainingData.hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-			m_TrainingData.hRect_CropSmoothEncap_magnus.top = m_TrainingData.hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_Smooth_EncapManus[0];
-			
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.top = m_TrainingData.hRect_EncapLocation_magnus.top;
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.bottom = m_TrainingData.hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_RemoveBLHeight_magnus[0];
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLLeft_magnus[0];
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLRight_magnus[0];
-		}
-		else if (nFOV ==4)// bottom
-		{
-			if ((int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[1] > 0)
-				m_TrainingData.hRect_EncapLocation_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[1];
-			else m_TrainingData.hRect_EncapLocation_magnus.left = 0;
-			if ((int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[1] < nImage_Width)
-				m_TrainingData.hRect_EncapLocation_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[1];
-			else m_TrainingData.hRect_EncapLocation_magnus.right = (int)nImage_Width;
-
-			m_TrainingData.hRect_EncapLocation_magnus.top = (int)nbottom_DeviceLocationEncap_magnus;
-
-			if ((int)ntop_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1] <  nImage_Height && 
-				(int)ntop_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1]>0)
-			m_TrainingData.hRect_EncapLocation_magnus.bottom = (int)nbottom_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1];
-			else m_TrainingData.hRect_EncapLocation_magnus.bottom = (int)nImage_Height;
-			m_TrainingData.hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-			m_TrainingData.hRect_CropSmoothEncap_magnus.bottom = m_TrainingData.hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_Smooth_EncapManus[1];
-
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.bottom = m_TrainingData.hRect_EncapLocation_magnus.bottom;
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.top = m_TrainingData.hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_RemoveBLHeight_magnus[1];
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLLeft_magnus[1];
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLRight_magnus[1];
-		}
-	
-	}
-	else if (nTeachStep == 15)
-	{
-			m_TrainingData.hRect_CropNoSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-
-			if (nFOV == 1)// top
-			{
-				m_TrainingData.nCrop_Smooth_EncapManus[0] = m_TrainingData.hRect_CropSmoothEncap_magnus.Height();
-				m_TrainingData.nCrop_RemoveBLHeight_magnus[0] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.Height();
-				if (m_TrainingData.nCrop_Smooth_EncapManus[0] <= m_TrainingData.hRect_EncapLocation_magnus.Height())
-				{
-
-					m_TrainingData.hRect_CropNoSmoothEncap_magnus.bottom = m_TrainingData.hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_Smooth_EncapManus[0];
-					m_TrainingData.hRect_CropSmoothEncap_magnus.top = m_TrainingData.hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_Smooth_EncapManus[0];
-					//////////Save 
-
-
-				}
-				else
-				{
-					m_TrainingData.hRect_CropNoSmoothEncap_magnus.bottom = m_TrainingData.hRect_CropNoSmoothEncap_magnus.top ;
-					m_TrainingData.hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-
-				}
-
-				
-
-				m_TrainingData.nCrop_ExpandLeft_magnus[0] = m_TrainingData.hRect_EncapLocation_magnus.left - m_TrainingData.hRect_DeviceLocationEncap_magnus.left;
-				m_TrainingData.nCrop_ExpandRight_magnus[0] = m_TrainingData.hRect_EncapLocation_magnus.right - m_TrainingData.hRect_DeviceLocationEncap_magnus.right;
-				m_TrainingData.nCrop_ExpandHeight_magnus[0] = m_TrainingData.hRect_EncapLocation_magnus.Height();
-				m_TrainingData.nCrop_Smooth_EncapManus[0] = m_TrainingData.hRect_CropSmoothEncap_magnus.Height();
-			
-				m_TrainingData.nCrop_RemoveBLHeight_magnus[0] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.Height();
-				m_TrainingData.nCrop_RemoveBLLeft_magnus[0] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.left - m_TrainingData.hRect_DeviceLocationEncap_magnus.left;
-				m_TrainingData.nCrop_RemoveBLRight_magnus[0] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.right - m_TrainingData.hRect_DeviceLocationEncap_magnus.right;
-
-			}
-			else if (nFOV == 4)// bottom
-			{
-
-				m_TrainingData.nCrop_Smooth_EncapManus[1] = m_TrainingData.hRect_CropSmoothEncap_magnus.Height();
-				//m_TrainingData.hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-				if (m_TrainingData.nCrop_Smooth_EncapManus[1] <= m_TrainingData.hRect_EncapLocation_magnus.Height())
-				{
-					m_TrainingData.hRect_CropNoSmoothEncap_magnus.top = m_TrainingData.hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_Smooth_EncapManus[1];
-					m_TrainingData.hRect_CropSmoothEncap_magnus.bottom = m_TrainingData.hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_Smooth_EncapManus[1];
-					//////////Save 
-				}
-				else
-				{
-					m_TrainingData.hRect_CropNoSmoothEncap_magnus.top = m_TrainingData.hRect_CropNoSmoothEncap_magnus.top;
-					m_TrainingData.hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-
-				}
-				m_TrainingData.nCrop_ExpandLeft_magnus[1] = m_TrainingData.hRect_EncapLocation_magnus.left - m_TrainingData.hRect_DeviceLocationEncap_magnus.left;
-				m_TrainingData.nCrop_ExpandRight_magnus[1] = m_TrainingData.hRect_EncapLocation_magnus.right - m_TrainingData.hRect_DeviceLocationEncap_magnus.right;
-				m_TrainingData.nCrop_ExpandHeight_magnus[1] = m_TrainingData.hRect_EncapLocation_magnus.Height();
-				m_TrainingData.nCrop_Smooth_EncapManus[1] = m_TrainingData.hRect_CropSmoothEncap_magnus.Height();
-
-				m_TrainingData.nCrop_RemoveBLHeight_magnus[1] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.Height();
-				m_TrainingData.nCrop_RemoveBLLeft_magnus[1] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.left - m_TrainingData.hRect_DeviceLocationEncap_magnus.left;
-				m_TrainingData.nCrop_RemoveBLRight_magnus[1] = m_TrainingData.hRect_CropRemoveBlackLine_magnus.right - m_TrainingData.hRect_DeviceLocationEncap_magnus.right;
-			}
-		
-
-
-	//	CRect hRect_EncapLocation_magnus = m_TrainingData.hRect_EncapLocation_magnus;
-		HRegion hRectangle_DeviceLocation_magnus;
-		GenRectangle1(&hRectangle_DeviceLocation_magnus,
-			m_TrainingData.hRect_EncapLocation_magnus.top,
-			m_TrainingData.hRect_EncapLocation_magnus.left,
-			m_TrainingData.hRect_EncapLocation_magnus.bottom,
-			m_TrainingData.hRect_EncapLocation_magnus.right);
-		HImage hCrop_image_magnus;
-		ReduceDomain(hImages, hRectangle_DeviceLocation_magnus, &hCrop_image_magnus);
-
-		/////////// Threshold white and black region///////////////
-		
-		HRegion hBlack_Region_magnus, hWhite_Region_magnus;
-		int nThreshMin_Black_magnus = m_TrainingData.nThreshMin_Black_EncapManus;
-		int nThreshMax_Black_magnus = m_TrainingData.nThreshMax_Black_EncapManus;
-		int nThreshMin_White_magnus = m_TrainingData.nThreshMin_White_EncapManus;
-		int nThreshMax_White_magnus = m_TrainingData.nThreshMax_White_EncapManus;
-		Threshold(hCrop_image_magnus, &hBlack_Region_magnus, nThreshMin_Black_magnus, nThreshMax_Black_magnus);
-		Threshold(hCrop_image_magnus, &hWhite_Region_magnus, nThreshMin_White_magnus, nThreshMax_White_magnus);
-
-		/////////// Dilate White Region to remove intersection line between black and white region ///////////
-
-		HRegion hDilation_WhiteRegion_magnus;
-		int nX_Dilation_White_magnus = m_TrainingData.nDilateX_EncapManus;
-		int nY_Dilation_White_magnus = m_TrainingData.nDilateY_EncapManus;
-		DilationRectangle1(hWhite_Region_magnus, &hDilation_WhiteRegion_magnus, nX_Dilation_White_magnus, nY_Dilation_White_magnus);
-
-		/////////// Union White and Black  and Remove BlackLine region//////////////
-
-		HRegion hUnionRegion_WhiteBlack_magnus;
-		Union2(hBlack_Region_magnus, hDilation_WhiteRegion_magnus, &hUnionRegion_WhiteBlack_magnus);
-
-		HRegion hRect_CropRemoveBlackLine_magnus;
-		HRegion hUnionRegion_WhiteBlackBL_magnus;
-		GenRectangle1(&hRect_CropRemoveBlackLine_magnus,
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.top,
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.left,
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.bottom,
-			m_TrainingData.hRect_CropRemoveBlackLine_magnus.right);
-
-		Union2(hUnionRegion_WhiteBlack_magnus, hRect_CropRemoveBlackLine_magnus, &hUnionRegion_WhiteBlackBL_magnus);
-
-		//int nShapeAreaRemove_magnus = m_TrainingData.nArea_Object_EncapManus;
-		//HRegion hSelectRegion_BW_magnus;
-		//SelectShape(hUnionRegion_WhiteBlackBL_magnus, &hSelectRegion_BW_magnus, "width", "and", 400, 99999);
-		//HRegion hFillupRegion_BW_magnus;
-		//FillUp(hUnionRegion_WhiteBlackBL_magnus, &hFillupRegion_BW_magnus);
-		//
-
-		////////// Remove White and black region /////////////
-		HRegion hDiffRegion_magnus;
-		Difference(hRectangle_DeviceLocation_magnus, hUnionRegion_WhiteBlackBL_magnus, &hDiffRegion_magnus);
-		//////////////Remove top black line ( filter)
-		HRegion hRegionOpening_fill_magnus;
-		int nX_Opening_fill_magnus = m_TrainingData.nOpeningX_EncapManus;
-		int nY_Opening_fill_magnus = m_TrainingData.nOpeningY_EncapManus;
-		OpeningRectangle1(hDiffRegion_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
-
-		///////////////////////////////// Select shape and fillup////////
-
-		HRegion hConnection_opening_magnus, hRegionOpening_Select_magnus, hRegionOpening_Circle_magnus;
-		int nValueOpening_Circle_magnus = m_TrainingData.nValue_OpeningCircle_magnus;
-		Connection(hRegionOpening_fill_magnus, &hConnection_opening_magnus);
-		SelectShape(hConnection_opening_magnus, &hRegionOpening_Select_magnus, "width", "and", 400, 9999);
-		HRegion hFillupRegion_diff_magnus;
-		FillUp(hRegionOpening_Select_magnus, &hFillupRegion_diff_magnus);
-		OpeningCircle(hFillupRegion_diff_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
-
-	//////////////////// gen Crop smooth contour to intersection/////////////
-	HXLD hContour_Encap_magnus, hCropContour_After_magnus;
-	HXLD hCropContour_BeforeSmooth_magnus;
-
-	/// Opening to smooth corner before use smoothContour
-	HRegion hRegionOpening_CircleCrop_magnus;
-	OpeningCircle(hRegionOpening_Circle_magnus, &hRegionOpening_CircleCrop_magnus, m_TrainingData.nValue_OpeningCircleCrop_magnus);		
-	// Crop contour to smooth
-	int nValueSmooth_Crop_magnus = m_TrainingData.nValue_Smooth_EncapMagnus;
-	GenContourRegionXld(hRegionOpening_CircleCrop_magnus, &hContour_Encap_magnus, "center");
-	//CRect hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_CropSmoothEncap_magnus;
-	CropContoursXld(hContour_Encap_magnus, &hCropContour_BeforeSmooth_magnus,
-		m_TrainingData.hRect_CropSmoothEncap_magnus.top,
-		m_TrainingData.hRect_CropSmoothEncap_magnus.left,
-		m_TrainingData.hRect_CropSmoothEncap_magnus.bottom,
-		m_TrainingData.hRect_CropSmoothEncap_magnus.right, "true");
-
-	SmoothContoursXld(hContour_Encap_magnus, &hCropContour_After_magnus, 2 * nValueSmooth_Crop_magnus + 1);
-	/////// Gen region smooth
-	HXLD hRegionContour_Smooth_magnus;
-	GenRegionContourXld(hCropContour_After_magnus, &hRegionContour_Smooth_magnus, "filled");
-	HRegion hRegionInter_CropSmooth_magnus;
-	Intersection(hRegionContour_Smooth_magnus, hRegionOpening_Circle_magnus, &hRegionInter_CropSmooth_magnus);
-
-	//////////////////////// Get region no smooth  //////////
-	
-	HRegion hRegionRectangle_CropNoSmooth_magnus;
-//	CRect hRect_CropNoSmoothEncap_magnus = m_TrainingData.hRect_CropNoSmoothEncap_magnus;
-	GenRectangle1(&hRegionRectangle_CropNoSmooth_magnus,
-		m_TrainingData.hRect_CropNoSmoothEncap_magnus.top,
-		m_TrainingData.hRect_CropNoSmoothEncap_magnus.left,
-		m_TrainingData.hRect_CropNoSmoothEncap_magnus.bottom,
-		m_TrainingData.hRect_CropNoSmoothEncap_magnus.right);
-	HRegion hRegionInter_Nosmooth_magnus, hRegionUnion_2RegionSmooth_magnus, hRegionBoundary_2Region_Smooth_magnus;
-	Intersection(hRegionOpening_Circle_magnus, hRegionRectangle_CropNoSmooth_magnus, &hRegionInter_Nosmooth_magnus);
-	
-	//////////// Union Smooth and NoSmooth Region
-
-	Union2(hRegionInter_Nosmooth_magnus, hRegionInter_CropSmooth_magnus, &hRegionUnion_2RegionSmooth_magnus);
-	OpeningCircle(hRegionUnion_2RegionSmooth_magnus, &hRegionUnion_2RegionSmooth_magnus, nValueOpening_Circle_magnus);
-	Boundary(hRegionUnion_2RegionSmooth_magnus, &hRegionBoundary_2Region_Smooth_magnus, "inner");
-	m_arrayOverlayTeach.Add(hRegionUnion_2RegionSmooth_magnus, colorYellow);
-//	m_arrayOverlayTeach.Add(hRegionRectangle_CropNoSmooth_magnus, colorYellow);
-
-
-
-	//m_arrayOverlayTeach.Add(hRegionInter_CropSmooth_magnus, colorGreen);
-}
-	////////////////////////////////////
-	/////// end Encap Bottom Magnus/////////
-	////////////////////////////////////
-
-	else if (nTeachStep == 13) {
+	else if (nTeachStep == 1) {
 		m_arrayOverlayTeach.RemoveAll();
 
 		HRegion hDeviceLocationSelected;
@@ -1142,22 +790,7 @@ int CInspectionCore::Teach(HImage hImages,
 
 		m_TrainingData.darrayPVI[0][0].Add(hPVIArea.D());
 		m_TrainingData.hvec_TupleVectorPVI[0].InsertAt(0, hPVIArea);
-		///////
-		/////
-		//////
-		//////
 
-
-
-		//m_EncapMagnusPam.Crop_Smooth = 1;
-
-
-
-
-		//////
-		//////
-		//////
-		//////
 		HRegion hFitPVIRegion;
 		HRegion hPVIRegion;
 		for (int nArea = 0; nArea < hPVIArea; nArea++) 
@@ -2726,2076 +2359,1854 @@ int CInspectionCore::Inspect(HImage hImage,
 			StepDebug(hDebugImage,hDebugRegion, colorGreen, hDebugMsg, bRegionInsp);
 		}
 	}
-	else if(bRegionInsp) 
-{
-//	if 
-//#pragma region find location params	
-//
-//
-//		//// Find location params
-//		HRegion hDeviceLocationSelected;
-//		HTuple hIsSelected, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol;
-//		HTuple hCount, hArea, hDeviceCenterRow, hDeviceCenterCol;
-//
-//		_FCI_Extract_LocationParameterData(pTrainingData->hTupleProjectionParam, pTrainingData->hTupleTeachDoc,
-//			pTrainingData->hTupleEdgeTeachTuple, pTrainingData->hTupleDatumTeachTuple, nCurDoc,
-//			&hIsSelected, &hInspectRotationAngle, &hInspectShiftAlongRow, &hInspectShiftAlongCol);
-//
-//		if (0 != (hIsSelected == 0))
-//		{
-//			if(nCurTrack == 2)
-//				return 0;// -DEVICE_LOCATION;
-//			else
-//				return -DEVICE_LOCATION;
-//		}
-//		
-//		HTuple hConcatArea, hRow2, hColumn2, hMaxArea;
-//		AreaCenter(pTrainingData->hObjectDeviceLocation, &hConcatArea, &hRow2, &hColumn2);
-//		if (hConcatArea.TupleLength() > 0)
-//			TupleMax(hConcatArea, &hMaxArea);
-//		
-//		if (0 != (hMaxArea == 0))
-//		{
-//			if (nCurTrack == 2)
-//				return 0;// -DEVICE_LOCATION;
-//			else
-//				return -DEVICE_LOCATION;
-//		}
-//	
-//		CountObj(pTrainingData->hObjectDeviceLocation, &hCount);
-//		_FCI_Select_DeviceLocation(pTrainingData->hObjectDeviceLocation,
-//			&hDeviceLocationSelected,
-//			nCurDoc, &hDeviceCenterRow, &hDeviceCenterCol);
-//
-//		
-//		CountObj(hDeviceLocationSelected, &hCount);
-//		if (hCount < 1)
-//			return 0;
-//
-//		//AreaCenter(hDeviceLocationSelected, &hArea, &hDeviceCenterRow, &hDeviceCenterCol);
-//#pragma endregion find location params	
-//		/*if(hArea == 0)
-//			return -DEVICE_LOCATION;*/
-//
-//		//// Tilt Insp (FOV - first & last; Doc - top(3rd intensity) & side(1st intensity)) ////
-//		if (m_TiltInspParm.bEnable && nCurTrack != 1 && (nCurFOV == 1 || nCurFOV == nTotalFOV)) {
-//			HRegion hTiltRgn, hInspTiltRgnPortion;
-//			HTuple hContrast, hDistanceForTiltInsp, hTiltInspImgIndex;
-//			HTuple hTiltHeight;
-//			HTuple hTiltRgnChar, hTiltRgnHeight, hMeanGreyValue, hTiltRectRow, hTiltRectCol;
-//			HTuple hDebugMsgOutTilt;
-//			HImage hDebugImageOutTilt;
-//			HRegion hDebugRegionOutTilt;
-//
-//			hTiltRgnChar = hTiltRgnHeight = hMeanGreyValue = hTiltRectRow = hTiltRectCol = HTuple();
-//
-//			//hTiltInspImgIndex = m_TiltInspParm.nImageIndex - 1;
-//			//if (nCurDoc == hTiltInspImgIndex) {
-//				hContrast = m_TiltInspParm.nContrast;
-//				hDistanceForTiltInsp = m_TiltInspParm.nDistanceForTiltInsp / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//
-//				//hTiltRgnChar = m_TiltInspParm.nRegionChar;
-//				//hTiltRgnHeight = m_TiltInspParm.nRegionHeight;
-//				//hMeanGreyValue = m_TiltInspParm.nMeanGreyValue;
-//
-//				HTuple hRow1, hRow2, hCol1, hCol2, hXShift, hYShift;
-//				hRow1 = m_TrainingData.m_rectTilt.top;
-//				hRow2 = m_TrainingData.m_rectTilt.bottom;
-//				hCol1 = m_TrainingData.m_rectTilt.left;
-//				hCol2 = m_TrainingData.m_rectTilt.right;
-//				/*hXShift = m_TrainingData.m_nXShift;
-//				hYShift = m_TrainingData.m_nYShift;*/
-//
-//				TupleConcat(hTiltRectRow, hRow1.TupleConcat(hRow2), &hTiltRectRow);
-//				TupleConcat(hTiltRectCol, hCol1.TupleConcat(hCol2), &hTiltRectCol);
-//
-//				_FCI_Finding_TiltInspectionParameter(hImage, hDeviceLocationSelected,
-//													&hTiltRgn, &hInspTiltRgnPortion,&hDebugImageOutTilt,&hDebugRegionOutTilt,nStepDebug,
-//													hTiltRectRow, hTiltRectCol, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol,
-//													hContrast, hDistanceForTiltInsp,
-//													nCurFOV, nTotalFOV, nCurTrack + 1,
-//													&hTiltHeight,&hDebugMsgOutTilt);
-//
-//				TupleConcat(pInspData->hTiltHeight, hTiltHeight, &pInspData->hTiltHeight);
-//
-//				m_arrayOverlayInspection.Add(hTiltRgn, colorGreen);
-//
-//				if (nStepDebug) {
-//					StepDebug(hDebugImageOutTilt, hDebugRegionOutTilt, colorCyan, hDebugMsgOutTilt, bRegionInsp);
-//				}
-//				int nCount = pInspData->hTiltHeight.Length();
-//				OutputDebugLogTo(9, TRUE, "Tilt Insp:: Tilt Height Count %d", nCount);//// for testing
-//			//}
-//
-//			int nCurrentFOV = bDirForTiltInsp ? nTotalFOV : 1;
-//			if (nCurTrack == 2 && nCurDoc == 0 && nCurFOV == nCurrentFOV) {	//// Side Camera; First Intensity; Last/first FOV ////
-//				HTuple hTiltTolerance, hAngleOfSideView, hPass, hValue;
-//				HTuple hResolutionYTop, hResolutionYSide;
-//				HTuple hTopHeight1, hTopHeight2;
-//				HTuple hSideHeight1, hSideHeight2;
-//
-//				hTiltTolerance = m_TiltInspParm.nToleranceSide;
-//				hAngleOfSideView = m_TiltInspParm.nAngleOfSideView;
-//
-//				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
-//					hTopHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[0] : pInspData->hTiltHeight[2];
-//				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
-//					hSideHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[1] : pInspData->hTiltHeight[3];
-//				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
-//					hTopHeight2= bDirForTiltInsp ? pInspData->hTiltHeight[2] : pInspData->hTiltHeight[0];
-//				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
-//					hSideHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[3] : pInspData->hTiltHeight[1];
-//
-//				if (pCalibData->hResolutionYInput[0].Length() > 0) {
-//					hResolutionYTop = pCalibData->hResolutionYInput[0];
-//					double dValue = hResolutionYTop.D();
-//					OutputDebugLogTo(8, TRUE, "%s Resolution Top Y [%.4f]", strOutPutLog, dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("%s Top Y [%.4f]", strOutPutLog, dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//
-//				if (pCalibData->hResolutionYInput[1].Length() > 0) {
-//					hResolutionYSide = pCalibData->hResolutionYInput[1];
-//					double dValue = hResolutionYSide.D();
-//					OutputDebugLogTo(8, TRUE, "%s Resolution Side Y [%.4f]", strOutPutLog, dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("%s Resolution Side Y [%.4f]", strOutPutLog, dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//
-//				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
-//				{
-//					//hTopHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[0] : pInspData->hTiltHeight[2];
-//					HTuple hValue = hTopHeight1*hResolutionYTop;
-//					double dValue = hValue.D();
-//					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
-//				{
-//					//hSideHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[1] : pInspData->hTiltHeight[3];
-//					HTuple hValue = hSideHeight1*hResolutionYSide;
-//					double dValue = hValue.D();
-//					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV,strOutPutLog, hSideHeight1.D(), dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
-//				{
-//					//hTopHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[2] : pInspData->hTiltHeight[0];
-//					HTuple hValue = hTopHeight2*hResolutionYTop;
-//					double dValue = hValue.D();
-//					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight2.D(), dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight2.D(), dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
-//				{
-//					//hSideHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[3] : pInspData->hTiltHeight[1];
-//					HTuple hValue = hSideHeight2*hResolutionYSide;
-//					double dValue = hValue.D();
-//					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hSideHeight2.D(), dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hSideHeight2.D(), dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//
-//				_FCI_Tilt_Inspection(hTopHeight1, hTopHeight2, hResolutionYTop,
-//									hSideHeight1, hSideHeight2, hResolutionYSide,
-//									hTiltTolerance, hAngleOfSideView,
-//									&hPass, &hValue);
-//				
-//				ClearInspParam(pInspData, TRUE); // JY TESTING
-//				
-//				if (hValue.Length() > 0) {
-//					double dValue = hValue.D();
-//					OutputDebugLogTo(8, TRUE, "%s Tilt Inspection hValue [%.4f]", strOutPutLog,dValue);
-//					//// added to display in Output Log - data tab ////
-//					CString str;
-//					str.Format("%s Tilt Inspection hValue [%.4f]", strOutPutLog,dValue);
-//					strArrayInspValues.Add(str);
-//				}
-//
-//				if (hPass == FALSE)
-//					return -TILT_INSP;
-//			}
-//		}
-//
-//		//// Encap Insp ////
-//		//HTuple hImgIndex = m_EncapParm.nImageIndex - 1;
-//		HTuple hImgIndex = -1;
-//		//if (m_TrainingData.hvec_TupleVectorEncap.GetSize() > 0)
-//		//	if (m_TrainingData.hvec_TupleVectorEncap[14].Length() > 0)
-//		//		hImgIndex = ((m_TrainingData.hvec_TupleVectorEncap[/*nIndexEncap*/14][0]) /*- 1*/);
-//		if (m_EncapParm.bEnable) {
-//
-//			if(!m_TrainingData.bEnableEncap)
-//				return -ENCAP_INSUFFICIENT;
-//
-//			int nEncapIndex = 0;
-//			/*HTuple hMinEncapContrast = m_TrainingData.hvec_TupleVectorEncap.GetAt(nEncapIndex++);
-//			HTuple hMaxEncapContrast = m_TrainingData.hvec_TupleVectorEncap.GetAt(nEncapIndex++);*/
-//			HTuple hMinEncapContrast = m_TrainingData.nEncapMinContrast;
-//			HTuple hMaxEncapContrast = m_TrainingData.nEncapMaxContrast;
-//
-//			HTuple hWireColor;
-//			HImage hDebugImg;
-//			HRegion hEncapLocation, hDebugRgn;
-//			HTuple hIsEncap, IsPass, hIsPassForInsufficient, hIsPassForExcess, hDebugMsg;
-//
-//			hWireColor = nCurTrack;
-//
-//			HTuple hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2;
-//			hEncapRow1 = m_TrainingData.m_rectEncap[0].top;
-//			hEncapCol1 = m_TrainingData.m_rectEncap[0].left;
-//			hEncapRow2 = m_TrainingData.m_rectEncap[0].bottom;
-//			hEncapCol2 = m_TrainingData.m_rectEncap[0].right;
-//
-//			HRegion hEncapTeachRegion, hProjectedRegion;
-//			HTuple hDebugMsgOutEncap;
-//			HImage hDebugImageOutEncap;
-//			HRegion hDebugRegionOutEncap;
-//			HTuple hMessage;
-//	
-//			GenRectangle1(&hEncapTeachRegion, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
-//
-//			//Encap Tracing Mask
-//			HRegion hConcatEncapMaskRgn;
-//			GenEmptyObj(&hConcatEncapMaskRgn);
-//			/*for (int nMask = 0; nMask < m_TrainingData.nEncapTracingMaskNumber; nMask++) {
-//				HRegion hEncapTracingMask;
-//				hEncapRow1 = m_TrainingData.m_rectMaskEncapTracing[nMask].top;
-//				hEncapCol1 = m_TrainingData.m_rectMaskEncapTracing[nMask].left;
-//				hEncapRow2 = m_TrainingData.m_rectMaskEncapTracing[nMask].bottom;
-//				hEncapCol2 = m_TrainingData.m_rectMaskEncapTracing[nMask].right;
-//				GenRectangle1(&hEncapTracingMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
-//				ConcatObj(hConcatEncapMaskRgn, hEncapTracingMask, &hConcatEncapMaskRgn);
-//			}*/
-//			//HRegion hConcatEncapMaskRgn;
-//			HTuple hEncapPolygonPoints;
-//			GenEmptyObj(&hConcatEncapMaskRgn);
-//			for (int nMask = 0; nMask < m_TrainingData.nEncapTracingMaskNumber; nMask++) {
-//				HRegion hEncapTracingMask;
-//				hEncapPolygonPoints = HTuple();
-//				if (m_TrainingData.nEncapTracingMaskType[nMask] == RECTANGLE) {
-//					hEncapRow1 = m_TrainingData.m_rectMaskEncapTracing[nMask].top;
-//					hEncapCol1 = m_TrainingData.m_rectMaskEncapTracing[nMask].left;
-//					hEncapRow2 = m_TrainingData.m_rectMaskEncapTracing[nMask].bottom;
-//					hEncapCol2 = m_TrainingData.m_rectMaskEncapTracing[nMask].right;
-//					GenRectangle1(&hEncapTracingMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
-//				}
-//				else if (m_TrainingData.nEncapTracingMaskType[nMask] == ECLIPSE) {
-//					GenEllipse(&hEncapTracingMask, m_TrainingData.m_rectMaskEncapTracing[nMask].CenterPoint().y, m_TrainingData.m_rectMaskEncapTracing[nMask].CenterPoint().x, 0,
-//						m_TrainingData.m_rectMaskEncapTracing[nMask].Width() / 2, m_TrainingData.m_rectMaskEncapTracing[nMask].Height() / 2);
-//				}
-//				else if (m_TrainingData.nEncapTracingMaskType[nMask] == POLYGON) {
-//					HTuple hPoint;
-//					HTuple hRows, hCols;
-//					for (int nPointId = 0; nPointId < m_TrainingData.nEncapTracingPolygonPointNumber[nMask]; nPointId++) {
-//						TupleConcat(hRows, m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].y, &hRows);
-//						TupleConcat(hCols, m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].x, &hCols);
-//
-//						hPoint.Clear();
-//						hPoint.Append(m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].y);
-//						hPoint.Append(m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].x);
-//
-//						//TupleConcat(hEncapPolygonPoints, hPoint, &hEncapPolygonPoints);
-//					}
-//					GenRegionPolygonFilled(&hEncapTracingMask, hRows, hCols);
-//				}
-//				ConcatObj(hConcatEncapMaskRgn, hEncapTracingMask, &hConcatEncapMaskRgn);
-//			}
-//
-//			if (m_TrainingData.nEncapTracingMaskNumber > 0) {
-//				HRegion hFitEncapTracingMaskRegion;
-//				GenEmptyObj(&hFitEncapTracingMaskRegion);
-//				Union1(hConcatEncapMaskRgn, &hFitEncapTracingMaskRegion);
-//				Difference(hEncapTeachRegion, hFitEncapTracingMaskRegion, &hEncapTeachRegion);
-//
-//				//m_arrayOverlayTeach.Add(hFitEncapTracingMaskRegion, colorRed);
-//			}
-//
-//			_FCI_Encap_RegionProjection(hImage,hEncapTeachRegion,
-//				&hProjectedRegion,&hDebugImageOutEncap,&hDebugRegionOutEncap,nStepDebug,
-//				hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, 
-//				hInspectShiftAlongRow, hInspectShiftAlongCol,&hDebugMsgOutEncap);
-//			
-//			if (nStepDebug) {
-//				StepDebug(hDebugImageOutEncap, hDebugRegionOutEncap, colorCyan, hDebugMsgOutEncap, bRegionInsp);
-//			}
-//			//m_arrayOverlayInspection.Add(hProjectedRegion, colorOrange);
-//
-//			_FCI_Inspect_EncapLocation(hImage, hDeviceLocationSelected, hProjectedRegion,
-//										&hEncapLocation,
-//										&hDebugImg, &hDebugRgn,
-//										nStepDebug, hWireColor, hMinEncapContrast, hMaxEncapContrast,
-//										&hIsEncap, &hDebugMsg);
-//
-//			if (nStepDebug) {
-//				StepDebug(hDebugImg, hDebugRgn, colorCyan, hDebugMsg, bRegionInsp);
-//			}
-//			HTuple hErosionOffsetBG = m_EncapParm.dErosionOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//			ErosionCircle(hEncapLocation, &hEncapLocation, hErosionOffsetBG);
-//			ReduceDomain(hImage, hEncapLocation, &m_DefectData[nCurDoc].EncapProcessedBackGround);
-//			HRegion hRegionBG;
-//			Threshold(m_DefectData[nCurDoc].EncapProcessedBackGround, &hRegionBG, 2, 255);
-//			HTuple hRow1, hColumn1, hRow2, hColumn2;
-//			SmallestRectangle1(hRegionBG, &hRow1, &hColumn1, &hRow2, &hColumn2);
-//			CropRectangle1(m_DefectData[nCurDoc].EncapProcessedBackGround, &m_DefectData[nCurDoc].EncapProcessedBackGround, hRow1-50, hColumn1-50, hRow2+50, hColumn2+50);
-//			if (hIsEncap == TRUE) {
-//				m_arrayOverlayInspection.Add(hEncapLocation, colorOrange);
-//
-//				//Deep Learning Mode: 0: Classification, 1: Recognition
-//				if (m_EncapParm.bEnableEncapSurface)
-//				{
-//					HTuple hDebugMsgOutEncapDefect;
-//					HImage hDebugImageOutEncapDefect;
-//					HRegion hDebugRegionOutEncapDefect;
-//					HRegion hEncapDefectRegion;
-//					HTuple hErosionOffset, hMaxLayOnAllowedPercentage;
-//					hErosionOffset = m_EncapParm.dErosionOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMaxLayOnAllowedPercentage = m_EncapParm.dMaxLayOnAllowedPercentage;
-//
-//					//Encap Surface Mask
-//					HRegion hConcatEncapSurfaceMaskRgn;
-//					GenEmptyObj(&hConcatEncapSurfaceMaskRgn);
-//					for (int nMask = 0; nMask < m_TrainingData.nEncapSurfaceMaskNumber; nMask++) {
-//						HRegion hEncapSurfaceMask;
-//						hEncapRow1 = m_TrainingData.m_rectMaskEncapSurface[nMask].top;
-//						hEncapCol1 = m_TrainingData.m_rectMaskEncapSurface[nMask].left;
-//						hEncapRow2 = m_TrainingData.m_rectMaskEncapSurface[nMask].bottom;
-//						hEncapCol2 = m_TrainingData.m_rectMaskEncapSurface[nMask].right;
-//						GenRectangle1(&hEncapSurfaceMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
-//						ConcatObj(hConcatEncapSurfaceMaskRgn, hEncapSurfaceMask, &hConcatEncapSurfaceMaskRgn);
-//					}
-//
-//					if (m_TrainingData.nEncapSurfaceMaskNumber > 0) {
-//						HRegion hFitEncapSurfaceMaskRegion;
-//						GenEmptyObj(&hFitEncapSurfaceMaskRegion);
-//						Union1(hConcatEncapSurfaceMaskRgn, &hFitEncapSurfaceMaskRegion);
-//
-//						_FCI_Encap_RegionProjection(hImage, hFitEncapSurfaceMaskRegion,
-//							&hFitEncapSurfaceMaskRegion, &hDebugImageOutEncap, &hDebugRegionOutEncap, 0,
-//							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//							hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutEncap);
-//						Difference(hEncapLocation, hFitEncapSurfaceMaskRegion, &hEncapLocation);
-//						m_arrayOverlayInspection.Add(hFitEncapSurfaceMaskRegion, colorYellow);
-//					}
-//
-//
-//					if ( pTrainingData->bEnableDLModelInspect &&  pDeepLearningModule->m_nDeepLearningMode == 1) {
-//
-//						HTuple hDebugMsgOutEncapRP;
-//						HImage hDebugImageOutEncapRP;
-//						HRegion hEncapInspLocation;
-//						HRegion hDebugRegionOutEncapRP;
-//						HRegion hRect, hProjectedEncapRegion;
-//						HTuple hRectRow, hRectCol;
-//						GenEmptyObj(&hEncapInspLocation);
-//						for (int i = 1; i < 3; i++) {
-//							TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].top, &hRectRow);
-//							TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].bottom, &hRectRow);
-//							TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].left, &hRectCol);
-//							TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].right, &hRectCol);
-//							GenRectangle1(&hRect, m_TrainingData.m_rectEncap[i].top, m_TrainingData.m_rectEncap[i].left,
-//								m_TrainingData.m_rectEncap[i].bottom, m_TrainingData.m_rectEncap[i].right);
-//							ConcatObj(hEncapInspLocation, hRect, &hEncapInspLocation);
-//						}
-//
-//						_FCI_Encap_InnOuter_RgnProjection(hImage, hEncapInspLocation,
-//							&hProjectedEncapRegion, &hDebugImageOutEncapRP, &hDebugRegionOutEncapRP, nStepDebug,
-//							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow,
-//							hInspectShiftAlongCol, &hDebugMsgOutEncapRP);
-//
-//
-//						m_arrayOverlayInspection.Add(hProjectedEncapRegion, colorCyan);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutEncapRP, hDebugRegionOutEncapRP, colorCyan, hDebugMsgOutEncapRP, bRegionInsp);
-//						}
-//
-//						_FCI_Inspect_EncapDefects(hImage, hEncapLocation, hProjectedEncapRegion,
-//							&IsPass, &hIsPassForInsufficient, &hIsPassForExcess);
-//
-//
-//						if (IsPass == FALSE) {
-//							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//							Connection(hEncapLocation, &hEncapLocation);
-//							RegionFeatures(hEncapLocation, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//								, &hDefectInfo);
-//
-//							CleanDefectData(nCurDoc);
-//							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//							}
-//
-//							if (pTrainingData->bCentralizedVerificationMode) {
-//								//Get region points
-//								HObject hRegionBorder, hRegionUnion;
-//								Union1(hEncapLocation, &hRegionUnion);
-//								Boundary(hRegionUnion, &hRegionBorder, "outer");
-//								GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//								
-//								if (hCenterX.Length() > 0) {
-//									m_DefectData[nCurDoc].arrayDefectX.resize(1);
-//									m_DefectData[nCurDoc].arrayDefectY.resize(1);
-//									for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//										m_DefectData[nCurDoc].arrayDefectX[0].push_back(hCenterX[nPoint].I());
-//										m_DefectData[nCurDoc].arrayDefectY[0].push_back(hCenterY[nPoint].I());
-//									}
-//								}
-//
-//								//Inner and outer Encap Rectangle
-//								Connection(hProjectedEncapRegion, &hProjectedEncapRegion);
-//								RegionFeatures(hProjectedEncapRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//									, &hDefectInfo);
-//								for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//									m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//									m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//										hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//								}
-//
-//								HTuple hDefectCount;
-//								CountObj(hProjectedEncapRegion, &hDefectCount);
-//								int nEncapLocCount = hDefectCount.I();
-//								if (nEncapLocCount > 0) {
-//									m_DefectData[nCurDoc].arrayDefectX.resize(nEncapLocCount + 1);
-//									m_DefectData[nCurDoc].arrayDefectY.resize(nEncapLocCount + 1);
-//									for (int nIndex = 1; nIndex < m_DefectData[nCurDoc].arrayDefectX.size(); nIndex++) {
-//										m_DefectData[nCurDoc].arrayDefectX[nIndex].push_back(-1);
-//										m_DefectData[nCurDoc].arrayDefectY[nIndex].push_back(-1);
-//									}
-//								}
-//							}
-//							
-//
-//							if (hIsPassForInsufficient == FALSE)
-//								return -ENCAP_INSUFFICIENT;
-//							else if (hIsPassForExcess == FALSE)
-//								return -ENCAP_EXCESS;
-//						}
-//
-//						HTuple hEncapLocationRow1, hEncapLocationCol1, hEncapLocationRow2, hEncapLocationCol2;
-//						SmallestRectangle1(hEncapLocation, &hEncapLocationRow1, &hEncapLocationCol1, &hEncapLocationRow2, &hEncapLocationCol2);
-//						CleanDefectData(nCurDoc);
-//
-//						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint((hEncapLocationCol1.D() + hEncapLocationCol2.D()) / 2,
-//																					(hEncapLocationRow1.D() + hEncapLocationRow2.D()) / 2));
-//						
-//						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hEncapLocationCol1.D(), hEncapLocationRow1.D(),
-//																		hEncapLocationCol2.D(), hEncapLocationRow2.D()));
-//						return -ENCAP_CONTAMINATION;//Return Fake Error Code
-//					}
-//
-//					//----- Starting to inspect Encap Surface
-//
-//					HImage hEncapInspectedImage;
-//					_FCI_Encap_Extraction(hImage, hEncapLocation, &hEncapInspectedImage, &hDebugImageOutEncapDefect, &hDebugRegionOutEncapDefect, nStepDebug, \
-//											hErosionOffset, &hDebugMsgOutEncapDefect);
-//					if (nStepDebug) {
-//						StepDebug(hDebugImageOutEncapDefect, hDebugRegionOutEncapDefect, colorCyan, hDebugMsgOutEncapDefect, bRegionInsp);
-//					}
-//
-//					// -- Encap Crack
-//					HTuple  hDebugMsgOutEncapCrack;
-//					HImage hDebugImageOutEncapCrack;
-//					HRegion hDebugRegionOutEncapCrack;
-//					HRegion hCrackDefectRegion;
-//					HTuple hMinContrastCrack, hMinSizeCrack, hMinLengthCrack, hMinSquareSizeCrack, hIsPass;
-//					HTuple  hAllECrackDefectMinSize, hAllECrackDefectMinLength, hAllECrackDefectMinSqSize;
-//
-//					hMinContrastCrack = m_EncapParm.nMinContrastCrack;
-//					hMinSizeCrack = m_EncapParm.nMinSizeCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinLengthCrack = m_EncapParm.nMinLengthCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinSquareSizeCrack = m_EncapParm.nMinSquareSizeCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					_FCI_Inspect_Encap_Crack(hEncapInspectedImage,
-//						&hCrackDefectRegion, &hDebugImageOutEncapCrack, &hDebugRegionOutEncapCrack, nStepDebug,
-//						hMinContrastCrack, hMinSizeCrack, hMinLengthCrack, hMinSquareSizeCrack,
-//						&hIsPass, &hDebugMsgOutEncapCrack, &hAllECrackDefectMinSize, &hAllECrackDefectMinLength, &hAllECrackDefectMinSqSize);
-//
-//
-//					if (nStepDebug) {
-//						StepDebug(hDebugImageOutEncapCrack, hDebugRegionOutEncapCrack, colorCyan, hDebugMsgOutEncapCrack, bRegionInsp);
-//					}
-//					if (hIsPass == FALSE){
-//						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hCrackDefectRegion, &hCrackDefectRegion, &hDebugImageOutEncapCrack, &hDebugRegionOutEncapCrack,
-//							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapCrack, &hIsPass);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutEncapCrack, hDebugRegionOutEncapCrack, colorCyan, hDebugMsgOutEncapCrack, bRegionInsp);
-//						}
-//
-//						if (hIsPass == FALSE) {
-//							m_arrayOverlayInspection.Add(hCrackDefectRegion, colorRed);
-//							CString str;
-//							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							HTuple hValue = hAllECrackDefectMinSize * hResolution;
-//							double dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Crack Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllECrackDefectMinLength * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Crack Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinLength.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllECrackDefectMinSqSize * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Crack Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinSqSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							//Store the defect information for Deep Learning Saving
-//							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//							Connection(hCrackDefectRegion, &hCrackDefectRegion);
-//							RegionFeatures(hCrackDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//								, &hDefectInfo);
-//
-//							CleanDefectData(nCurDoc);
-//
-//							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//							}
-//
-//
-//							if (pTrainingData->bCentralizedVerificationMode) {
-//								//Get region points
-//								HObject hRegionBorder;
-//								HTuple hDefectCount;
-//								CountObj(hCrackDefectRegion, &hDefectCount);
-//								int nDefectCount = hDefectCount.I();
-//								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
-//								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
-//								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
-//									HObject hCurrentDefect;
-//									SelectObj(hCrackDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
-//									Boundary(hCurrentDefect, &hRegionBorder, "outer");
-//									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//									if (hCenterX.Length() > 0) {
-//										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
-//											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
-//										}
-//									}
-//								}
-//							}
-//
-//							return -ENCAP_CRACK;
-//						}
-//					}
-//
-//					// -- Encap Blow Hole
-//					HTuple hDebugMsgOutEncapBH;
-//					HImage hDebugImageOutEncapBH;
-//					HRegion hDebugRegionOutEncapBH;
-//					HRegion hBHDefectRegion;
-//					HTuple hMinCircularityBH, hMinLengthBH, hMinSquareSizeBH, hMinGrayMeanBH, hMinContrastBH, hMinSizeBH;
-//					HTuple hAllEBHDefectMinSize, hAllEBHDefectMinLength, hAllEBHDefectMinSqSize;
-//
-//					hMinContrastBH = m_EncapParm.nMinContrastBH;
-//					hMinSizeBH = m_EncapParm.nMinSizeBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinCircularityBH = m_EncapParm.dMinCircularityBH;
-//					hMinLengthBH = m_EncapParm.nMinLengthBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinSquareSizeBH = m_EncapParm.nMinSquareSizeBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinGrayMeanBH = m_EncapParm.nMinGrayMeanBH;
-//					_FCI_Inspect_BlowHole(hEncapInspectedImage,
-//						&hBHDefectRegion, &hDebugImageOutEncapBH, &hDebugRegionOutEncapBH, nStepDebug,
-//						hMinContrastBH, hMinSizeBH, hMinCircularityBH, hMinLengthBH, hMinSquareSizeBH, hMinGrayMeanBH,
-//						&hIsPass, &hDebugMsgOutEncapBH, &hAllEBHDefectMinSize, &hAllEBHDefectMinLength, &hAllEBHDefectMinSqSize);
-//
-//
-//					if (nStepDebug) {
-//						StepDebug(hDebugImageOutEncapBH, hDebugRegionOutEncapBH, colorCyan, hDebugMsgOutEncapBH, bRegionInsp);
-//					}
-//
-//					if (hIsPass == FALSE){
-//						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hBHDefectRegion, &hBHDefectRegion, &hDebugImageOutEncapBH, &hDebugRegionOutEncapBH,
-//							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapBH, &hIsPass);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutEncapBH, hDebugRegionOutEncapBH, colorCyan, hDebugMsgOutEncapBH, bRegionInsp);
-//						}
-//
-//						if (hIsPass == FALSE) {
-//							m_arrayOverlayInspection.Add(hBHDefectRegion, colorRed);
-//							CString str;
-//							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							HTuple hValue = hAllEBHDefectMinSize * hResolution;
-//							double dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap BlowHole Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllEBHDefectMinLength * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap BlowHole Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinLength.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllEBHDefectMinSqSize * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap BlowHole Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinSqSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							//Store the defect information for Deep Learning Saving
-//							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//							Connection(hBHDefectRegion, &hBHDefectRegion);
-//							RegionFeatures(hBHDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//								, &hDefectInfo);
-//
-//							CleanDefectData(nCurDoc);
-//
-//							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//							}
-//
-//							if (pTrainingData->bCentralizedVerificationMode) {
-//								//Get region points
-//								HObject hRegionBorder;
-//								HTuple hDefectCount;
-//								CountObj(hBHDefectRegion, &hDefectCount);
-//								int nDefectCount = hDefectCount.I();
-//								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
-//								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
-//								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
-//									HObject hCurrentDefect;
-//									SelectObj(hBHDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
-//									Boundary(hCurrentDefect, &hRegionBorder, "outer");
-//									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//									if (hCenterX.Length() > 0) {
-//										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
-//											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
-//										}
-//									}
-//								}
-//							}
-//
-//							return -ENCAP_BLOWHOLE;
-//						}
-//						
-//					}
-//
-//					HTuple hDebugMsgOutEncapCTM;
-//					HImage hDebugImageOutEncapCTM;
-//					HRegion hDebugRegionOutEncapCTM;
-//					HRegion hCTDefectRegion;
-//					HTuple hMaxCircularityCT, hMinLengthCT, hMinSquareSizeCT, hMinContrastCT, hMinSizeCT;
-//					HTuple hAllECTDefectMinSize, hAllECTDefectMinLength, hAllECTDefectMinSqSize;
-//
-//					hMinContrastCT = m_EncapParm.nMinContrastCT;
-//					hMinSizeCT = m_EncapParm.nMinSizeCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMaxCircularityCT = m_EncapParm.dMaxCircularityCT;
-//					hMinLengthCT = m_EncapParm.nMinLengthCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//					hMinSquareSizeCT = m_EncapParm.nMinSquareSizeCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//
-//					_FCI_Inspect_Contamination(hEncapInspectedImage,
-//						&hCTDefectRegion, &hDebugImageOutEncapCTM, &hDebugRegionOutEncapCTM, nStepDebug,
-//						hMinContrastCT, hMinSizeCT, hMinLengthCT, hMinSquareSizeCT, hMaxCircularityCT,
-//						&hIsPass, &hDebugMsgOutEncapCTM, &hAllECTDefectMinSize, &hAllECTDefectMinLength, &hAllECTDefectMinSqSize);
-//
-//					if (nStepDebug) {
-//						StepDebug(hDebugImageOutEncapCTM, hDebugRegionOutEncapCTM, colorCyan, hDebugMsgOutEncapCTM, bRegionInsp);
-//					}
-//
-//					if (hIsPass == FALSE){
-//						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hCTDefectRegion, &hCTDefectRegion, &hDebugImageOutEncapCTM, &hDebugRegionOutEncapCTM,
-//							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapCTM, &hIsPass);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutEncapCTM, hDebugRegionOutEncapCTM, colorCyan, hDebugMsgOutEncapCTM, bRegionInsp);
-//						}
-//
-//						if (hIsPass == FALSE) {
-//							m_arrayOverlayInspection.Add(hCTDefectRegion, colorRed);
-//							CString str;
-//							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							HTuple hValue = hAllECTDefectMinSize * hResolution;
-//							double dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Contamination Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllECTDefectMinLength * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Contamination Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinLength.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllECTDefectMinSqSize * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s EnCap Contamination Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinSqSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//							Connection(hCTDefectRegion, &hCTDefectRegion);
-//							RegionFeatures(hCTDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//								, &hDefectInfo);
-//
-//							CleanDefectData(nCurDoc);
-//
-//							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//							}
-//
-//							if (pTrainingData->bCentralizedVerificationMode) {
-//								//Get region points
-//								HObject hRegionBorder;
-//								HTuple hDefectCount;
-//								CountObj(hCTDefectRegion, &hDefectCount);
-//								int nDefectCount = hDefectCount.I();
-//								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
-//								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
-//								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
-//									HObject hCurrentDefect;
-//									SelectObj(hCTDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
-//									Boundary(hCurrentDefect, &hRegionBorder, "outer");
-//									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//									if (hCenterX.Length() > 0) {
-//										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
-//											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
-//										}
-//									}
-//								}
-//							}
-//
-//							return -ENCAP_CONTAMINATION;
-//						}
-//					}
-//				}
-//
-//				HTuple hDebugMsgOutEncapRP;
-//				HImage hDebugImageOutEncapRP;
-//				HRegion hEncapInspLocation;
-//				HRegion hDebugRegionOutEncapRP;
-//				HRegion hRect, hProjectedEncapRegion;
-//				HTuple hRectRow, hRectCol;
-//				GenEmptyObj(&hEncapInspLocation);
-//				for (int i = 1; i<3; i++) {
-//					TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].top, &hRectRow);
-//					TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].bottom, &hRectRow);
-//					TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].left, &hRectCol);
-//					TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].right, &hRectCol);
-//					GenRectangle1(&hRect, m_TrainingData.m_rectEncap[i].top, m_TrainingData.m_rectEncap[i].left,
-//						m_TrainingData.m_rectEncap[i].bottom, m_TrainingData.m_rectEncap[i].right);
-//					ConcatObj(hEncapInspLocation, hRect, &hEncapInspLocation);
-//				}	
-//	
-//				_FCI_Encap_InnOuter_RgnProjection(hImage,hEncapInspLocation,
-//					&hProjectedEncapRegion,&hDebugImageOutEncapRP,&hDebugRegionOutEncapRP,nStepDebug,
-//					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow, 
-//					hInspectShiftAlongCol,&hDebugMsgOutEncapRP);
-//				
-//				
-//				m_arrayOverlayInspection.Add(hProjectedEncapRegion, colorCyan);
-//
-//				if (nStepDebug) {
-//					StepDebug(hDebugImageOutEncapRP, hDebugRegionOutEncapRP, colorCyan, hDebugMsgOutEncapRP, bRegionInsp);
-//				}
-//
-//				_FCI_Inspect_EncapDefects(hImage, hEncapLocation, hProjectedEncapRegion,
-//										&IsPass, &hIsPassForInsufficient, &hIsPassForExcess);
-//
-//				
-//				if (IsPass == FALSE) {
-//					HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//					Connection(hEncapLocation, &hEncapLocation);
-//					RegionFeatures(hEncapLocation, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//						, &hDefectInfo);
-//
-//					CleanDefectData(nCurDoc);
-//
-//					for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//							hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//					}
-//
-//					if (pTrainingData->bCentralizedVerificationMode) {
-//						//Get region points
-//						HObject hRegionBorder, hRegionUnion;
-//						Union1(hEncapLocation, &hRegionUnion);
-//						Boundary(hRegionUnion, &hRegionBorder, "outer");
-//						GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//						if (hCenterX.Length() > 0) {
-//							m_DefectData[nCurDoc].arrayDefectX.resize(1);
-//							m_DefectData[nCurDoc].arrayDefectY.resize(1);
-//							for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//								m_DefectData[nCurDoc].arrayDefectX[0].push_back(hCenterX[nPoint].I());
-//								m_DefectData[nCurDoc].arrayDefectY[0].push_back(hCenterY[nPoint].I());
-//							}
-//						}
-//						//Inner and outer Encap
-//						Connection(hProjectedEncapRegion, &hProjectedEncapRegion);
-//						RegionFeatures(hProjectedEncapRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//							, &hDefectInfo);
-//						for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//							m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//							m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//								hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//						}
-//
-//						HTuple hDefectCount;
-//						CountObj(hProjectedEncapRegion, &hDefectCount);
-//						int nEncapLocCount = hDefectCount.I();
-//						if (nEncapLocCount > 0) {
-//							m_DefectData[nCurDoc].arrayDefectX.resize(nEncapLocCount+1);
-//							m_DefectData[nCurDoc].arrayDefectY.resize(nEncapLocCount+1);
-//							for (int nIndex = 1; nIndex < m_DefectData[nCurDoc].arrayDefectX.size(); nIndex++) {
-//								m_DefectData[nCurDoc].arrayDefectX[nIndex].push_back(-1);
-//								m_DefectData[nCurDoc].arrayDefectY[nIndex].push_back(-1);
-//							}
-//						}
-//					}
-//
-//					if (hIsPassForInsufficient == FALSE)
-//						return -ENCAP_INSUFFICIENT;
-//					else if (hIsPassForExcess == FALSE)
-//						return -ENCAP_EXCESS;
-//				}
-//			}
-//		}
-//
-//		//// Cover layer (Doc - 4th intensity) ////
-//		//HTuple hCoverLayerImgIndex = -1;
-//		//if (m_TrainingData.hvec_TupleVectorCoverLayer.GetSize() > 0)
-//		//	if (m_TrainingData.hvec_TupleVectorCoverLayer[0].Length() > 0)
-//		//		hCoverLayerImgIndex = ((m_TrainingData.hvec_TupleVectorCoverLayer[/*nIndexEncap*/0][0]) /*- 1*/);
-//		if (m_CoverLayerParm.bEnable ) {
-//			if(!m_TrainingData.bEnableCoverLayer)
-//				return -COVER_LAYER_INSP;
-//			
-//			HTuple hMaxRotAngle, PatternSearchAreaX, PatternSearchAreaY, hMinAccScore, hNoOfRegion;
-//			HTuple hCLDatumRow, hCLDatumCol, hCLModelID, hRefAngle, hRefPointRow, hRefPointCol;
-//			HTuple hRow, hCol, hRectRow, hRectCol;
-//
-//			int nIndexCL = 0;
-//			hNoOfRegion = m_TrainingData.nCLDatum;
-//			hMaxRotAngle = m_TrainingData.nCLMaxRotationAngle;
-//			PatternSearchAreaX = m_TrainingData.nCLPatternSearchX;
-//			PatternSearchAreaY = m_TrainingData.nCLPatternSearchY;
-//			hMinAccScore = m_TrainingData.nCLMinAcceptanceScore;
-//			hCLModelID = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
-//			hRefAngle = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
-//			hRefPointRow = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
-//			hRefPointCol = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
-//
-//			HTuple hDebugMsgOutEncapCLRP;
-//			HImage hDebugImageOutEncapCLRP;
-//			HRegion hDebugRegionOutEncapCLRP;
-//			HRegion hCLRegion, hInspProjectedRegionCL, hCVLRegion, hRect;
-//			GenEmptyObj(&hInspProjectedRegionCL);
-//
-//			for (int i = 0; i<m_TrainingData.nCLInspRegion; i++) {
-//				TupleConcat(hRectRow, m_TrainingData.m_rectCoverLayer[i].top, &hRectRow);
-//				TupleConcat(hRectRow, m_TrainingData.m_rectCoverLayer[i].bottom, &hRectRow);
-//				TupleConcat(hRectCol, m_TrainingData.m_rectCoverLayer[i].left, &hRectCol);
-//				TupleConcat(hRectCol, m_TrainingData.m_rectCoverLayer[i].right, &hRectCol);
-//				GenRectangle1(&hRect, m_TrainingData.m_rectCoverLayer[i].top, m_TrainingData.m_rectCoverLayer[i].left,
-//					m_TrainingData.m_rectCoverLayer[i].bottom, m_TrainingData.m_rectCoverLayer[i].right);
-//				ConcatObj(hInspProjectedRegionCL, hRect, &hInspProjectedRegionCL);
-//			}
-//
-//			HTuple hIsCVLDatumFound = 0;
-//			if(m_TrainingData.bEnableCLDatum)
-//			{
-//				HTuple hMatchModelScore, hMatchAngle, hDatumMatchCR, hDatumMatchCC, hDebugMessageOut;
-//				HRegion hModelRegion;
-//
-//				for (int i = 0; i<m_TrainingData.nCLDatum; i++) {
-//					TupleConcat(hRow, m_TrainingData.m_rectCLDatum[i].top, &hRow);
-//					TupleConcat(hRow, m_TrainingData.m_rectCLDatum[i].bottom, &hRow);
-//					TupleConcat(hCol, m_TrainingData.m_rectCLDatum[i].left, &hCol);
-//					TupleConcat(hCol, m_TrainingData.m_rectCLDatum[i].right, &hCol);
-//				}
-//
-//				_FCI_Inspect_UniquePattern(hImage,
-//					&hModelRegion, &hDebugImage, &hDebugRegion, nStepDebug,
-//					PatternSearchAreaX, PatternSearchAreaY, hMaxRotAngle,
-//					hMinAccScore, hCLModelID, hRow, hCol,
-//					&hIsCVLDatumFound, &hMatchModelScore, &hMatchAngle,
-//					&hDatumMatchCR, &hDatumMatchCC, &hDebugMessageOut);
-//
-//				if (nStepDebug) {
-//					StepDebug(hDebugImage, hDebugRegion, colorCyan, hDebugMessageOut, bRegionInsp);
-//				}
-//
-//				if (hIsCVLDatumFound == TRUE)
-//				{
-//					_FCI_ConnectedRgn_RegionProjection(hImage,
-//						&hCVLRegion, &hInspProjectedRegionCL,&hDebugImageOutEncapCLRP,&hDebugRegionOutEncapCLRP,nStepDebug,
-//						hNoOfRegion, hRectRow, hRectCol, hRefAngle,hRefPointRow,hRefPointCol, hMatchAngle, hDatumMatchCR,
-//						hDatumMatchCC,&hDebugMsgOutEncapCLRP);
-//				}
-//			}
-//
-//			//If can not found the datum or CVL datum is disabled --> following the shifted was found by Device Locatio Step
-//			if (hIsCVLDatumFound == FALSE) {
-//				_FCI_Encap_RegionProjection(hImage, hInspProjectedRegionCL,
-//					&hInspProjectedRegionCL, &hDebugImageOutEncapCLRP, &hDebugRegionOutEncapCLRP, 0,
-//					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//					hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutEncapCLRP);
-//			}
-//
-//			HRegion hMissingCVLRegion;
-//			GenEmptyObj(&hMissingCVLRegion);
-//
-//			HTuple hCoverLayerPresent;
-//			GenEmptyObj(&hCLRegion);
-//			for (int i = 0; i < m_TrainingData.nCLInspRegion; i++) {
-//				HRegion hSelectedRegion, hCLDefectRegion;
-//				SelectObj(hInspProjectedRegionCL, &hSelectedRegion, i+1);
-//
-//				HTuple hDebugMsgOutEncapCLDefect;
-//				HImage hDebugImageOutEncapCLDefect;
-//				HRegion hDebugRegionOutEncapCLDefect;
-//				HTuple hContrast = m_CoverLayerParm.nContrast[i];
-//				HTuple hMinLength = m_CoverLayerParm.nCoverLayerLength[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				HTuple hMinHeight = m_CoverLayerParm.nCoverLayerHeight[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				HTuple hMaxGap = m_CoverLayerParm.dMaskSize[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				HTuple hGapWidthTolerance = m_CoverLayerParm.dGapWidthTolerance[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				HTuple hGapHeightTolerance = m_CoverLayerParm.dGapHeightTolerance[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				HTuple hIsCoverLayer;
-//
-//				_FCI_Inspect_CoverLayer(hImage, hSelectedRegion,
-//					&hCLDefectRegion,&hDebugImageOutEncapCLDefect,&hDebugRegionOutEncapCLDefect,nStepDebug,
-//					hContrast, hMaxGap, hGapWidthTolerance, hGapHeightTolerance, hMinLength, hMinHeight, nCurFOV, nTotalFOV,
-//					&hCoverLayerPresent,&hDebugMsgOutEncapCLDefect);
-//
-//				if (nStepDebug) {
-//					StepDebug(hDebugImageOutEncapCLDefect, hDebugRegionOutEncapCLDefect, colorCyan, hDebugMsgOutEncapCLDefect, bRegionInsp);
-//				}
-//
-//				if (hCoverLayerPresent == TRUE)
-//					ConcatObj(hCLRegion, hCLDefectRegion, &hCLRegion);
-//				else
-//					ConcatObj(hMissingCVLRegion, hSelectedRegion, &hMissingCVLRegion);
-//			}
-//
-//			HTuple hNumOfCL;
-//			CountObj(hCLRegion, &hNumOfCL);
-//
-//			m_arrayOverlayInspection.Add(hCLRegion, colorCyan);
-//			if (hNumOfCL < m_TrainingData.nCLInspRegion){
-//				//Store the defect information for Deep Learning Saving
-//				HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//				Connection(hMissingCVLRegion, &hMissingCVLRegion);
-//				RegionFeatures(hMissingCVLRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//					, &hDefectInfo);
-//
-//				CleanDefectData(nCurDoc);
-//
-//				for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//					m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//					m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//						hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//				
-//					if (pTrainingData->bCentralizedVerificationMode) {
-//						//Create Fake Point --> Rectangle Information is enough --> No need get the region points
-//						m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
-//						m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
-//					}
-//				}
-//
-//				return -COVER_LAYER_INSP;
-//			}
-//
-//			if (m_CoverLayerAlignmentParm.bEnablePointer)
-//			{
-//				HTuple  hNoOfPointers;
-//				HTuple hPointerRows = HTuple();
-//				HTuple hPointerCols = HTuple();
-//
-//				hNoOfPointers = m_TrainingData.hvec_TupleVectorCoverLayerPointer.GetAt(1);
-//
-//				HTuple hDebugMsgOutPointerRP;
-//				HImage hDebugImageOutPointerRP;
-//				HRegion hDebugRegionOutPointerRP;
-//				HRegion hPointerRegion, hRectPointer, hProjectedPointerRegion;
-//				HTuple hRectRow, hRectCol;
-//					
-//				if (m_TrainingData.bEnableManualPointer == TRUE)
-//				{
-//					GenEmptyObj(&pTrainingData->hObjectPointerLocation);
-//					for (int nPointer = 0; nPointer < hNoOfPointers; nPointer++)
-//					{
-//						GenEmptyObj(&hRectPointer);
-//						GenEmptyObj(&hPointerRegion);
-//						TupleConcat(hPointerRows, m_TrainingData.m_rectPointer[nPointer].top, &hPointerRows);
-//						TupleConcat(hPointerRows, m_TrainingData.m_rectPointer[nPointer].bottom, &hPointerRows);
-//						TupleConcat(hPointerCols, m_TrainingData.m_rectPointer[nPointer].left, &hPointerCols);
-//						TupleConcat(hPointerCols, m_TrainingData.m_rectPointer[nPointer].right, &hPointerCols);
-//						GenRectangle1(&hRectPointer, m_TrainingData.m_rectPointer[nPointer].top, m_TrainingData.m_rectPointer[nPointer].left,
-//							m_TrainingData.m_rectPointer[nPointer].bottom, m_TrainingData.m_rectPointer[nPointer].right);
-//						_FCI_CVLA_ManualPointer_RgnProjection(hImage, hRectPointer,
-//							&hPointerRegion, &hDebugImageOutPointerRP, &hDebugRegionOutPointerRP, nStepDebug,
-//							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol, hNoOfPointers,
-//							&hDebugMsgOutPointerRP);
-//						m_arrayOverlayInspection.Add(hPointerRegion, colorBlue);
-//						ConcatObj(pTrainingData->hObjectPointerLocation, hPointerRegion, &pTrainingData->hObjectPointerLocation);
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutPointerRP, hDebugRegionOutPointerRP, colorCyan, hDebugMsgOutPointerRP, bRegionInsp);
-//						}
-//					}
-//				}
-//				for (int nPointer = 0; nPointer < hNoOfPointers; nPointer++)
-//				{
-//					HTuple hNoOfPointers, hMaxRotationAngle, hPatternSearchAreaAlongX, hPatternSearchAreaAlongY, hMinAcceptanceScore, hEnableManualPointer;
-//					HTuple hIsPass, hPercentageOut;
-//					HRegion hDebugRegionOut, hPointerRegion;
-//					HRegion hSelectedPointer, hSelectedCoverLayerSkeleton, hSelectedCoverLayerInsufficient;
-//					hNoOfPointers = m_TrainingData.hvec_TupleVectorCoverLayerPointer.GetAt(1);
-//					HTuple hTolerance = (m_CoverLayerAlignmentParm.dToleranceDist[nPointer] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2)) * 2;
-//					HTuple hIsHorizontal = m_CoverLayerAlignmentParm.nCoverLayerDirection[nPointer];
-//					int nIndexCLAP = 0;
-//					if (m_TrainingData.bEnableManualPointer == TRUE)
-//					{
-//						_FCI_Inspect_CoverLayerAlignmentUsingManualPointer(hImage, pTrainingData->hObjectPointerLocation, hCLRegion,
-//							&hSelectedPointer, &hSelectedCoverLayerSkeleton,
-//							 hTolerance, hIsHorizontal, nPointer + 1,
-//							&hIsPass, &hPercentageOut);
-//					}
-//					else
-//					{
-//						_FCI_Inspect_CoverLayerAlignmentUsingPointer(hImage, pTrainingData->hObjectPointerLocation, hCLRegion,
-//							&hSelectedPointer, &hSelectedCoverLayerSkeleton,
-//							hTolerance, hIsHorizontal, nPointer + 1,
-//							&hIsPass, &hPercentageOut);			
-//					}
-//					if (hIsPass == 0) {
-//						m_arrayOverlayInspection.Add(hSelectedCoverLayerInsufficient, colorRed);
-//						return -COVER_LAYER_ALIGNMENT;
-//					}
-//					else
-//					{
-//						m_arrayOverlayInspection.Add(hSelectedPointer, colorYellow);
-//						m_arrayOverlayInspection.Add(hSelectedCoverLayerSkeleton, colorYellow);
-//					}
-//				}
-//			}
-//		}
-//		if (m_SlotParm.bEnable) {
-//			CleanDefectData(nCurDoc);
-//
-//			int nIsPassAll[5] = { 1,1,1,1,1 };
-//			HTuple hDebugMsgOutSlot;
-//			HImage hDebugImageOutSlot;
-//			HRegion hDebugRegionOutSlot, hConcatSlotMaskRgnProjected;
-//			HTuple hMessage;
-//			HRegion hConcatSlotMaskRgn;
-//			HTuple hSlotPolygonPoints, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2;
-//			GenEmptyObj(&hConcatSlotMaskRgnProjected);
-//			GenEmptyObj(&hConcatSlotMaskRgn);
-//			for (int nMask = 0; nMask < m_TrainingData.nSlotMaskNumber; nMask++) {
-//				HRegion hSlotMask;
-//				hSlotPolygonPoints = HTuple();
-//				if (m_TrainingData.nSlotMaskType[nMask] == RECTANGLE) {
-//					hSlotRow1 = m_TrainingData.m_rectMaskSlot[nMask].top;
-//					hSlotCol1 = m_TrainingData.m_rectMaskSlot[nMask].left;
-//					hSlotRow2 = m_TrainingData.m_rectMaskSlot[nMask].bottom;
-//					hSlotCol2 = m_TrainingData.m_rectMaskSlot[nMask].right;
-//					GenRectangle1(&hSlotMask, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2);
-//				}
-//				else if (m_TrainingData.nSlotMaskType[nMask] == ECLIPSE) {
-//					GenEllipse(&hSlotMask, m_TrainingData.m_rectMaskSlot[nMask].CenterPoint().y, m_TrainingData.m_rectMaskSlot[nMask].CenterPoint().x, 0,
-//						m_TrainingData.m_rectMaskSlot[nMask].Width() / 2, m_TrainingData.m_rectMaskSlot[nMask].Height() / 2);
-//				}
-//				else if (m_TrainingData.nSlotMaskType[nMask] == POLYGON) {
-//					HTuple hPoint;
-//					HTuple hRows, hCols;
-//					for (int nPointId = 0; nPointId < m_TrainingData.nSlotMaskPolygonPointCount[nMask]; nPointId++) {
-//						TupleConcat(hRows, m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].y, &hRows);
-//						TupleConcat(hCols, m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].x, &hCols);
-//
-//						hPoint.Clear();
-//						hPoint.Append(m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].y);
-//						hPoint.Append(m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].x);
-//
-//						//TupleConcat(hSlotPolygonPoints, hPoint, &hSlotPolygonPoints);
-//					}
-//					GenRegionPolygonFilled(&hSlotMask, hRows, hCols);
-//				}
-//				Union2(hConcatSlotMaskRgn, hSlotMask, &hConcatSlotMaskRgn);
-//				HTuple hArea, hDummy;
-//				AreaCenter(hConcatSlotMaskRgn, &hArea, &hDummy, &hDummy);
-//				if(hArea > 0)
-//					_FCI_Encap_RegionProjection(hImage, hConcatSlotMaskRgn,
-//						&hConcatSlotMaskRgnProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
-//						hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//						hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
-//			}
-//			m_arrayOverlayInspection.Add(hConcatSlotMaskRgnProjected, colorYellow);
-//
-//			for (int k = 0; k < m_TrainingData.nNumOfSlot; k++) {
-//				HTuple hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2, hMinIntensity, hContrastEdgeSlot, hIsPass;
-//				HRegion hSlotTeachRegion, hSlotTeachProjected, hSlotLocation;
-//				if (m_TrainingData.nSlotAreaType == RECTANGLE) {
-//					hSlotRow1 = m_TrainingData.m_rectSlot[k].top;
-//					hSlotCol1 = m_TrainingData.m_rectSlot[k].left;
-//					hSlotRow2 = m_TrainingData.m_rectSlot[k].bottom;
-//					hSlotCol2 = m_TrainingData.m_rectSlot[k].right;
-//					GenRectangle1(&hSlotTeachRegion, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2);
-//				}
-//				else {
-//					HTuple hRows, hCols;
-//					for (int nPointId = 0; nPointId < m_TrainingData.nSlotPolygonPointCount; nPointId++) {
-//						TupleConcat(hRows, m_TrainingData.m_SlotPolygonPoint[k][nPointId].y, &hRows);
-//						TupleConcat(hCols, m_TrainingData.m_SlotPolygonPoint[k][nPointId].x, &hCols);
-//					}
-//					GenRegionPolygonFilled(&hSlotTeachRegion, hRows, hCols);
-//				}
-//				
-//				_FCI_Encap_RegionProjection(hImage, hSlotTeachRegion,
-//					&hSlotTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
-//					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//					hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
-//
-//				//m_arrayOverlayInspection.Add(hSlotTeachProjected, colorYellow);
-//
-//				hMinIntensity = m_TrainingData.nMinIntensitySlot;
-//				hContrastEdgeSlot = m_TrainingData.nContrastEdgeSlot;
-//				_FCI_Inspect_SlotLocation(hImage, hSlotTeachProjected, 
-//					&hSlotLocation, &hDebugImageOutSlot, &hDebugRegionOutSlot,
-//					nStepDebug, hMinIntensity, hContrastEdgeSlot,
-//					&hIsPass, &hDebugMsgOutSlot);
-//				if (nStepDebug) {
-//					StepDebug(hDebugImageOutSlot, hDebugRegionOutSlot, colorCyan, hDebugMsgOutSlot, bRegionInsp);
-//				}
-//				if (hIsPass == 1) {
-//					m_arrayOverlayInspection.Add(hSlotLocation, colorOrange);
-//					if (m_SlotParm.bEnableCheckSurface[k]) {
-//						HTuple hDummy, hColumnSlotLocation, hRowSlotLocation;
-//						AreaCenter(hSlotLocation, &hDummy, &hRowSlotLocation, &hColumnSlotLocation);
-//						HTuple hSlotLimitRow1, hSlotLimitCol1, hSlotLimitRow2, hSlotLimitCol2;
-//						HRegion hSlotLimitTeachRegion, hSlotLimitTeachProjected;
-//
-//						if (m_TrainingData.nSlotLimitAreaType == RECTANGLE) {
-//							hSlotLimitRow1 = m_TrainingData.m_rectSlotLimit[k].top;
-//							hSlotLimitCol1 = m_TrainingData.m_rectSlotLimit[k].left;
-//							hSlotLimitRow2 = m_TrainingData.m_rectSlotLimit[k].bottom;
-//							hSlotLimitCol2 = m_TrainingData.m_rectSlotLimit[k].right;
-//							GenRectangle1(&hSlotLimitTeachRegion, hSlotLimitRow1, hSlotLimitCol1, hSlotLimitRow2, hSlotLimitCol2);
-//						}
-//						//POLYGON Type
-//						else {
-//							HTuple hRows, hCols;
-//							for (int nPointId = 0; nPointId < m_TrainingData.nSlotLimitPolygonPointCount; nPointId++) {
-//								TupleConcat(hRows, m_TrainingData.m_SlotLimitPolygonPoint[k][nPointId].y, &hRows);
-//								TupleConcat(hCols, m_TrainingData.m_SlotLimitPolygonPoint[k][nPointId].x, &hCols);
-//							}
-//							GenRegionPolygonFilled(&hSlotLimitTeachRegion, hRows, hCols);
-//						}
-//
-//						HTuple hColumnSlotLimitLocation, hShiftColumnSlotLimit, hRowSlotLimitLocation, hShiftRowSlotLimit;
-//						AreaCenter(hSlotLimitTeachRegion, &hDummy, &hRowSlotLimitLocation, &hColumnSlotLimitLocation);
-//						hShiftRowSlotLimit = hRowSlotLimitLocation - hRowSlotLocation;
-//						hShiftColumnSlotLimit = hColumnSlotLimitLocation - hColumnSlotLocation;
-//
-//						/*HTuple hSlotSize, hSlotWidth, hSlotHeight;
-//						RegionFeatures(hSlotLimitTeachRegion, (HTuple("width").Append("height")), &hSlotSize);
-//						hSlotWidth = hSlotSize[0];
-//						hSlotHeight = hSlotSize[1];
-//						if (hSlotHeight > hSlotWidth) {
-//							_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
-//								&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
-//								hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//								hInspectShiftAlongRow, hShiftColumnSlotLimit, &hDebugMsgOutSlot);
-//						}
-//						else {
-//							_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
-//								&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
-//								hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//								hShiftRowSlotLimit, hInspectShiftAlongCol, &hDebugMsgOutSlot);
-//						}*/
-//
-//						_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
-//							&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
-//							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//							hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
-//
-//						//m_arrayOverlayInspection.Add(hSlotLimitTeachProjected, colorCyan);
-//
-//						HTuple hEdgeOffset, hMinGVDiff, hMinContrast, hMinSizeDefect, hMinLengthDefect, hMinSquareSizeDefect, hMinCount;
-//						HRegion hSlotDefect;
-//						HTuple hAllDefectMinSize, hAllDefectMinLength, hAllDefectMinSqSize;
-//						hEdgeOffset = m_SlotParm.nEdgeOffset[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//						hMinGVDiff = m_SlotParm.nMinMeanGVDiffSlot[k];
-//						hMinContrast = m_SlotParm.nMinContrast[k];
-//						hMinSizeDefect = m_SlotParm.nMinSize[k] / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
-//						hMinLengthDefect = m_SlotParm.nMinLength[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//						hMinSquareSizeDefect = m_SlotParm.nMinSquareSize[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//						hMinCount = m_SlotParm.nMinCount[k];
-//						HRegion hSlotLocationMasking;
-//						Difference(hSlotLocation, hConcatSlotMaskRgnProjected, &hSlotLocationMasking);
-//
-//						_FCI_Inspect_SlotDefect(hImage, hSlotLocation, hSlotLimitTeachProjected, hSlotLocationMasking, &hSlotDefect, &hDebugImageOutSlot, &hDebugRegionOutSlot,
-//							nStepDebug, hEdgeOffset, hMinGVDiff, hMinContrast, hMinSizeDefect, hMinLengthDefect, hMinSquareSizeDefect, hMinCount,
-//							&hIsPass, &hDebugMsgOutSlot, &hAllDefectMinSize, &hAllDefectMinLength, &hAllDefectMinSqSize);
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOutSlot, hDebugRegionOutSlot, colorCyan, hDebugMsgOutSlot, bRegionInsp);
-//						}
-//						if (hIsPass == FALSE) {
-//							m_arrayOverlayInspection.Add(hSlotDefect, colorRed);
-//							CString str;
-//							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							HTuple hValue = hAllDefectMinSize * (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
-//							double dValue = hValue.D();
-//							str.Format("Fov[%d] %s Slot Defect Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllDefectMinLength * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s Slot Defect Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinLength.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							hValue = hAllDefectMinSqSize * hResolution;
-//							dValue = hValue.D();
-//							str.Format("Fov[%d] %s Slot Defect Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinSqSize.D(), dValue);
-//							strArrayInspValues.Add(str);
-//
-//							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//							Connection(hSlotDefect, &hSlotDefect);
-//							RegionFeatures(hSlotDefect, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//								, &hDefectInfo);
-//
-//							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//							}
-//							if (pTrainingData->bCentralizedVerificationMode) {
-//								//Get region points
-//								HObject hRegionBorder;
-//								HTuple hDefectCount;
-//								CountObj(hSlotDefect, &hDefectCount);
-//								int nDefectCount = hDefectCount.I();
-//								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
-//									HObject hCurrentDefect;
-//									SelectObj(hSlotDefect, &hCurrentDefect, HTuple(nDefectIdx + 1));
-//									Boundary(hCurrentDefect, &hRegionBorder, "outer");
-//									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//									if (hCenterX.Length() > 0) {
-//										std::vector<int> arrayX;
-//										std::vector<int> arrayY;
-//										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//											arrayX.push_back(hCenterX[nPoint].I());
-//											arrayY.push_back(hCenterY[nPoint].I());
-//										}
-//										m_DefectData[nCurDoc].arrayDefectX.push_back(arrayX);
-//										m_DefectData[nCurDoc].arrayDefectY.push_back(arrayY);
-//									}
-//									else {
-//										m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
-//										m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
-//									}
-//								}
-//							}
-//
-//
-//							nIsPassAll[k] = 0;
-//						}
-//					}
-//				}
-//				else {
-//					m_arrayOverlayInspection.Add(hSlotTeachProjected, colorRed);
-//
-//					HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//					Connection(hSlotTeachProjected, &hSlotTeachProjected);
-//					RegionFeatures(hSlotTeachProjected, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//						, &hDefectInfo);
-//
-//					for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
-//						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
-//							hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//					
-//						if (pTrainingData->bCentralizedVerificationMode) {
-//							//Create Fake Point --> Rectangle Information is enough --> No need get the region points
-//							m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
-//							m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
-//						}
-//					}
-//
-//					nIsPassAll[k] = 0;
-//					continue;
-//				}
-//			}
-//
-//			for (int k = 0; k < 5; k++) {
-//				if (nIsPassAll[k] == 0) {
-//					return -SLOT;
-//				}
-//			}
-//		}
-//		//// Device Edge Insp ////
-//		if (m_DieEdgeParm.bEnable)
-//		{
-//			HTuple hDeviceLocationEnable = m_TrainingData.hvec_TupleVectorLocation.GetAt(0);
-//			if (hDeviceLocationEnable == 1)
-//			{
-//				HImage hImageForPVI_Inspection, hImageRotate, hImageRotateShift;
-//				HImage hDebugImageOutPviRegion;
-//				HRegion hDebugRegionOutPviRegion;
-//				HRegion hRegionForPVI_Inspection, hRegionAffineTrans, hRegionAffineRotateShift;
-//				HTuple hDebugMsgOutPviRegion;
-//			
-//				HTuple hLocationSelectedRow, hLocationSelectedCol, hLocationSelectedPhi, hLocationSelectedLen1, hLocationSelectedLen2;
-//				SmallestRectangle2(hDeviceLocationSelected, &hLocationSelectedRow, &hLocationSelectedCol, &hLocationSelectedPhi, &hLocationSelectedLen1, &hLocationSelectedLen2);
-//
-//				Projection_Function(hImage, hDeviceLocationSelected, &hRegionAffineRotateShift, &hImageRotateShift,
-//					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
-//					hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol, hInspectShiftAlongRow,
-//					hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion);
-//
-//				
-//				HImage hImageAbsDiff, hImageSub;
-//				AbsDiffImage(hTeachImage, hImageRotateShift, &hImageAbsDiff, 1);
-//				HRegion hFitMaskRegion, hPviTeachRegion;
-//				GenEmptyRegion(&hFitMaskRegion);
-//				GenEmptyRegion(&hPviTeachRegion);
-//
-//				Projection_Back_Function(hImage,hRegionForPVI_Inspection, hImageAbsDiff, hFitMaskRegion, hPviTeachRegion, &hRegionForPVI_Inspection, &hImageSub,
-//					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
-//					-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
-//					0, &hDebugMsgOutPviRegion);
-//
-//				//// Rotate Teach Region
-//				HTuple hSobelAmp, hDeviceLocationEnable, hNoOfLocationRegions, hDeviceLocWidth, hDeviceLocHeight, hDeviceMaskSize;
-//				HTuple hMinDeviceContrast, hLocationTeachRows, hLocationTeachCols, hDummy, hReferencePointType;
-//
-//				int nIndex = 0;
-//				hDeviceLocationEnable = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hNoOfLocationRegions = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDeviceLocWidth = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDeviceLocHeight = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDeviceMaskSize = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hMinDeviceContrast = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hSobelAmp = m_TrainingData.bSobelAmp;
-//				hReferencePointType = m_TrainingData.nDeviceReferencePointType;
-//
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hLocationTeachRows = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hLocationTeachCols = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				//For Device Edge Detection option
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
-//
-//				HRegion hTeachLocationRegion;
-//				_FCI_Inspect_EdgeLocation(hTeachImage,
-//					&hTeachLocationRegion, hSobelAmp, hNoOfLocationRegions, hDeviceLocWidth, hDeviceLocHeight, hMinDeviceContrast,
-//					hLocationTeachRows, hLocationTeachCols, hDeviceMaskSize, nCurFOV, nTotalFOV, nCurTrack + 1, hReferencePointType, 
-//					&hDummy, &hDummy, &hDummy);
-//
-//				HTuple hTeachLocationRow, hTeachLocationCol, hTeachLocationPhi, hTeachLocationLen1, hTeachLocationLen2;
-//				SmallestRectangle2(hTeachLocationRegion, &hTeachLocationRow, &hTeachLocationCol, &hTeachLocationPhi, &hTeachLocationLen1, &hTeachLocationLen2);
-//
-//				Projection_Function(hImage, hTeachLocationRegion, &hRegionAffineRotateShift, &hImageRotateShift,
-//					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
-//					-hInspectRotationAngle, hTeachLocationRow, hTeachLocationCol, -hInspectShiftAlongRow,
-//					-hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion);
-//
-//				////
-//
-//				//// Set Offset & width
-//				HTuple hOffset = m_DieEdgeParm.dOffset > 0 ? m_DieEdgeParm.dOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_DieEdgeParm.dOffset;
-//				HTuple hWidth = m_DieEdgeParm.dWidth > 0 ? m_DieEdgeParm.dWidth / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_DieEdgeParm.dWidth;
-//				HRegion hDieEdgeInspRegion = hDeviceLocationSelected;
-//				HImage hImageSubEdge;
-//
-//
-//				HImage hDebugImageForPVI_Inspection;
-//				HRegion hDebugRegionForPVI_Inspection;
-//				HTuple hDebugMessageOut;
-//
-//				_FCI_OffsetRegions(hRegionAffineRotateShift, hImageSub,
-//					&hDieEdgeInspRegion, &hImageSubEdge,
-//					&hDebugImageForPVI_Inspection, &hDebugRegionForPVI_Inspection,
-//					nStepDebug, hOffset, hWidth,0,TRUE,
-//					&hDebugMessageOut);
-//
-//				if (nStepDebug) 
-//					StepDebug(hDebugImageForPVI_Inspection, hDebugRegionForPVI_Inspection, colorCyan, hDebugMessageOut, bRegionInsp);
-//
-//				if (hOffset > 0) {
-//					m_arrayOverlayInspection.Add(hDieEdgeInspRegion, colorCyan);
-//					if (hWidth > 0) {
-//						HRegion hFillUp, hHole;
-//						FillUp(hDieEdgeInspRegion, &hFillUp);
-//						Difference(hFillUp, hRegionForPVI_Inspection, &hHole);
-//						m_arrayOverlayInspection.Add(hHole, colorCyan);
-//					}
-//				}
-//
-//				HRegion hHoleRegion;
-//				if (hWidth > 0)
-//				{
-//					HRegion hFillUp;
-//					FillUp(hDieEdgeInspRegion, &hFillUp);
-//					Difference(hFillUp, hDieEdgeInspRegion, &hHoleRegion);
-//					m_arrayOverlayInspection.Add(hHoleRegion, colorCyan);
-//				}
-//
-//				if (nStepDebug) {
-//					HTuple hMsg = "Device Edge Insp Region";
-//					StepDebug(hImage, hDieEdgeInspRegion, colorCyan, hMsg, bRegionInsp);
-//					HTuple hNumHole = 0;
-//					if (hWidth > 0)
-//					{
-//						HRegion hFillUp;
-//						FillUp(hDieEdgeInspRegion, &hFillUp);
-//						Difference(hFillUp, hDieEdgeInspRegion, &hHoleRegion);
-//						StepDebug(hImageSubEdge, hHoleRegion, colorCyan, hMsg, bRegionInsp);
-//					}
-//				}
-//
-//				HTuple hDefectCharecterstics, hContrast, hMinSize, hMinLength, hMinSquareSize, hMinCount;
-//
-//				hDefectCharecterstics = m_DieEdgeParm.nDefectCharacteristics;
-//				hContrast = m_DieEdgeParm.nContrast;
-//				hMinSize = m_DieEdgeParm.m_nSize / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
-//				hMinLength = m_DieEdgeParm.nMinLength / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				hMinSquareSize = m_DieEdgeParm.nMinSquareSize / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//				hMinCount = m_DieEdgeParm.nMinCount;
-//
-//				HTuple hPass;
-//				HRegion hEdgeDefectRegion;
-//
-//				_FCI_PVI_Inspection(hImageSubEdge, hDieEdgeInspRegion, hImage,
-//					&hEdgeDefectRegion,
-//					&hDebugImage, &hDebugRegion,
-//					hDefectCharecterstics, hContrast,
-//					hMinLength, hMinSize, hMinSquareSize, hMinCount,
-//					nStepDebug, nCurDoc,0,0,TRUE,
-//					&hPass, &hDebugMsg);
-//
-//				if (nStepDebug) {
-//					StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
-//				}
-//
-//				if (hPass == FALSE) {
-//					m_arrayOverlayInspection.Add(hEdgeDefectRegion, colorRed);
-//					return -DIE_EDGE;
-//				}
-//
-//				
-//			}
-//		}
-//
-//		//// Region Insp ////
-//
-//		HTuple hPVIArea, hPVIAngle, hPVI2DCenter, hPVISize = 0; 
-//		if(m_TrainingData.hvec_TupleVectorPVI[0].GetSize() > 0)
-//			hPVIArea = m_TrainingData.hvec_TupleVectorPVI[0][0];
-//
-//		if(hPVIArea != 0 && hPVIArea.Length() > 0) {
-//			BOOL bPVIEnable = FALSE;
-//			for (int i = 0; i < hPVIArea; i++) {
-//				if (m_pPviInspectionSetup[i].bEnable)
-//					bPVIEnable = TRUE;
-//			}
-//			if (bPVIEnable)
-//			{ 
-//
-//				m_arrayOverlayPVIInsp.RemoveAll();
-//
-//				HImage hImageForPVI_Inspection, hImageRotate, hImageRotateShift;
-//				HRegion hRegionForPVI_Inspection, hRegionAffineTrans, hRegionAffineRotateShift;
-//				HTuple hDebugMsgOutPviRegion;
-//				HImage hDebugImageOutPviRegion;
-//				HRegion hDebugRegionOutPviRegion;
-//				HTuple hMaskNumber;
-//				HTuple hMask2DCenterPoints, hMaskAngleConcat, hMaskSize, hPolygonPoints;
-//				HTuple hSlotNumber;
-//				HTuple hSlot2DCenterPoints, hSlotAngleConcat, hSlotSize;
-//				HTuple hTeachModelRowCentre, hTeachModelColCentre;
-//				HTuple hMatchModelCentreRow, hMatchModelCentreCol;
-//
-//				HTuple hLocationSelectedRow, hLocationSelectedCol, hLocationSelectedPhi, hLocationSelectedLen1, hLocationSelectedLen2;
-//				SmallestRectangle2(hDeviceLocationSelected, &hLocationSelectedRow, &hLocationSelectedCol, &hLocationSelectedPhi, &hLocationSelectedLen1, &hLocationSelectedLen2);
-//				HTuple hDebugMsgOutPviRegion_T;
-//				HImage hDebugImageOutPviRegion_T;
-//				HRegion hDebugRegionOutPviRegion_T;
-//
-//				Projection_Function(hImage, hDeviceLocationSelected, &hRegionAffineRotateShift, &hImageRotateShift,
-//					&hDebugImageOutPviRegion_T, &hDebugRegionOutPviRegion_T, nStepDebug,
-//					hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol, hInspectShiftAlongRow, 
-//					hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion_T);
-//
-//				HImage hImageAbsDiff;
-//				AbsDiffImage(hTeachImage, hImageRotateShift, &hImageAbsDiff, 1);
-//
-//				for (int nArea = 0; nArea < hPVIArea; nArea++) {
-//
-//					if (!m_pPviInspectionSetup[nArea].bEnable && !m_pPviInspectionSetup[nArea].bEdgeEnable)
-//						continue;
-//
-//					int nIndex = 1;
-//					hPVIAngle = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hPVI2DCenter = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hPVISize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//
-//					hMaskNumber = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hMask2DCenterPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hMaskAngleConcat = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hMaskSize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//
-//					hSlotNumber = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hSlot2DCenterPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hSlotAngleConcat = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//					hSlotSize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//
-//					hPolygonPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
-//
-//					HRegion hConcatMask, hRectMask;
-//					HRegion hPviTeachRegion;
-//					GenEmptyObj(&hPviTeachRegion);
-//
-//					if (m_pPviInspectionSetup[nArea].nDeviceAreaType == RECTANGLE)
-//						GenRectangle2(&hRegionForPVI_Inspection, hPVI2DCenter[0], hPVI2DCenter[1], hPVIAngle, hPVISize[0], hPVISize[1]);
-//					else if (m_pPviInspectionSetup[nArea].nDeviceAreaType == ECLIPSE)
-//						GenEllipse(&hRegionForPVI_Inspection, hPVI2DCenter[0], hPVI2DCenter[1], 0,
-//							m_pPviInspectionSetup[nArea].m_rectPviArea.Width() / 2, m_pPviInspectionSetup[nArea].m_rectPviArea.Height() / 2);
-//					else if (m_pPviInspectionSetup[nArea].nDeviceAreaType == POLYGON) {
-//						HTuple hRows, hCols;
-//						for (int nPointId = 0; nPointId < m_pPviInspectionSetup[nArea].nPolygonPointNumber; nPointId++) {
-//							TupleConcat(hRows, hPolygonPoints[2 * nPointId], &hRows);
-//							TupleConcat(hCols, hPolygonPoints[2 * (nPointId + 1) - 1], &hCols);
-//						}
-//						GenRegionPolygonFilled(&hRegionForPVI_Inspection, hRows, hCols);
-//					}
-//
-//					
-//					ConcatObj(hPviTeachRegion, hRegionForPVI_Inspection, &hPviTeachRegion);
-//					GenEmptyObj(&hConcatMask);
-//
-//					for (int nMaskIndex = 0; nMaskIndex < hMaskNumber; nMaskIndex++)
-//					{
-//						GenRectangle2(&hRectMask, hMask2DCenterPoints[2 * nMaskIndex], hMask2DCenterPoints[2 * (nMaskIndex + 1) - 1],
-//							hMaskAngleConcat[nMaskIndex], hMaskSize[2 * nMaskIndex], hMaskSize[2 * (nMaskIndex + 1) - 1]);
-//						ConcatObj(hConcatMask, hRectMask, &hConcatMask);
-//					}
-//
-//					
-//
-//					//	m_arrayOverlayInspection.Add(hConcatMask, colorYellow);//TEsting 
-//					HRegion hFitMaskRegion;
-//					GenEmptyObj(&hFitMaskRegion);
-//					if (hMaskNumber > 0)
-//					{
-//						Union1(hConcatMask, &hFitMaskRegion);
-//						Difference(hRegionForPVI_Inspection, hFitMaskRegion, &hRegionForPVI_Inspection);
-//					}
-//					
-//					HImage hImageRotateShiftBack, hImageSub;
-//					HRegion hRegionAffineRotateShiftBack;
-//
-//					HTuple hDebugMsgOutPviRegionArea;
-//					HImage hDebugImageOutPviRegionArea;
-//					HRegion hDebugRegionOutPviRegionArea;
-//
-//					/*Projection_Back_Function(hRegionForPVI_Inspection, hImageAbsDiff, &hRegionForPVI_Inspection, &hImageSub,
-//						&hDebugImageOutPviRegionArea, &hDebugRegionOutPviRegionArea, nStepDebug,
-//						-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
-//						nArea, &hDebugMsgOutPviRegionArea);*/
-//
-//					Projection_Back_Function(hImage,hRegionForPVI_Inspection, hImageAbsDiff, hFitMaskRegion, hPviTeachRegion, &hRegionForPVI_Inspection, &hImageSub,
-//						&hDebugImageOutPviRegionArea, &hDebugRegionOutPviRegionArea, nStepDebug,
-//						-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
-//						nArea, &hDebugMsgOutPviRegionArea);
-//					HTuple hNumHole = 0;
-//					HRegion hMaskRegion;
-//					HRegion hSlotRegion;
-//					RegionFeatures(hRegionForPVI_Inspection, "holes_num", &hNumHole);
-//					if (hNumHole > 0)
-//					{
-//						HRegion hFillUp;
-//						FillUp(hRegionForPVI_Inspection, &hFillUp);
-//						Difference(hFillUp, hRegionForPVI_Inspection, &hMaskRegion);
-//						m_arrayOverlayInspection.Add(hMaskRegion, colorYellow);
-//						Difference(hFillUp, hRegionForPVI_Inspection, &hSlotRegion);
-//						m_arrayOverlayInspection.Add(hSlotRegion, colorYellow);
-//					}
-//					m_arrayOverlayInspection.Add(hRegionForPVI_Inspection, colorOrange);
-//
-//					if (nStepDebug) {
-//						StepDebug(hDebugImageOutPviRegionArea, hDebugRegionOutPviRegionArea, colorCyan, hDebugMsgOutPviRegionArea, bRegionInsp);
-//					}
-//					else {
-//						if (m_pPviInspectionSetup[nArea].bEnable || m_pPviInspectionSetup[nArea].bEdgeEnable) {
-//							HRegion hPVIDefectRegionDummy;
-//							PVIDefectsOverlay(hImageSub, hPVIDefectRegionDummy, "", colorRed);
-//						}
-//					}
-//
-//					//// PVI Insp ////
-//					if (m_pPviInspectionSetup[nArea].bEnable) {
-//						ReduceDomain(hImageSub, hRegionForPVI_Inspection, &hImageForPVI_Inspection);
-//					}
-//
-//					if (m_pPviInspectionSetup[nArea].bEdgeEnable)  {
-//						//// Edge insp ///
-//						HTuple hEdgeWidth = m_pPviInspectionSetup[nArea].dEdgeWidth > 0 ? m_pPviInspectionSetup[nArea].dEdgeWidth / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_pPviInspectionSetup[nArea].dEdgeWidth;
-//						HTuple hEdgeOffset = m_pPviInspectionSetup[nArea].dEdgeOffset > 0 ? m_pPviInspectionSetup[nArea].dEdgeOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_pPviInspectionSetup[nArea].dEdgeOffset;
-//
-//						HTuple hMinEdgeContrast, hMaxEdgeContrast, hEdgeRgnOpen;
-//						HTuple hIsEdgePVIPass, hDebugMessageOut;
-//
-//						HImage hDebugImageOut;
-//						HRegion hDebugRegionOut;
-//
-//						hMinEdgeContrast = m_pPviInspectionSetup[nArea].nMinEdgeContrast;
-//						hMaxEdgeContrast = m_pPviInspectionSetup[nArea].nMaxEdgeContrast;
-//						hEdgeRgnOpen = m_pPviInspectionSetup[nArea].dEdgeRegionOpen / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//						if (hEdgeRgnOpen < 1)
-//							hEdgeRgnOpen = 1;
-//
-//						_FCI_ExtractExactEdge(hImage, hRegionForPVI_Inspection,
-//							&hRegionForPVI_Inspection, &hDebugImageOut, &hDebugRegionOut, 
-//							nStepDebug, hMinEdgeContrast, hMaxEdgeContrast, hEdgeRgnOpen,
-//							nArea,&hIsEdgePVIPass, &hDebugMessageOut);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageOut, hDebugRegionOut, colorCyan, hDebugMessageOut, bRegionInsp);
-//						}
-//
-//						HImage hDebugImageForPVI_Inspection;
-//						HRegion hDebugRegionForPVI_Inspection;
-//
-//						_FCI_OffsetRegions(hRegionForPVI_Inspection, hImageSub,
-//							&hRegionForPVI_Inspection, &hImageForPVI_Inspection,
-//							&hDebugImageForPVI_Inspection, &hDebugRegionForPVI_Inspection,
-//							nStepDebug, hEdgeOffset, hEdgeWidth, 
-//							nArea,FALSE,&hDebugMessageOut);
-//
-//						if (nStepDebug) {
-//							StepDebug(hDebugImageForPVI_Inspection, hDebugRegionForPVI_Inspection, colorCyan, hDebugMessageOut, bRegionInsp);
-//						}
-//
-//						if (hEdgeOffset > 0) {
-//							m_arrayOverlayInspection.Add(hRegionForPVI_Inspection, colorCyan);
-//							if (hEdgeWidth > 0) {
-//								HRegion hFillUp, hHole;
-//								FillUp(hRegionForPVI_Inspection, &hFillUp);
-//								Difference(hFillUp, hRegionForPVI_Inspection, &hHole);
-//								m_arrayOverlayInspection.Add(hHole, colorCyan);
-//							}
-//						}
-//					}
-//
-//					BOOL bPVIPassAll = TRUE;
-//					for (int nDefCount = 0; nDefCount < m_pPviInspectionSetup[nArea].nDefectCount; nDefCount++) {
-//						if (m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].bEnable) {
-//							HTuple hDefectCharecterstics, hContrast, hMinSize, hMinLength, hMinSquareSize, hMinCount;
-//
-//							hDefectCharecterstics = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nDefectCharacteristics;
-//							hContrast = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nContrast;
-//							hMinSize = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nSize / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
-//							hMinLength = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinLength / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							hMinSquareSize = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinSquareSize / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//							hMinCount = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinCount;
-//
-//							HTuple hPass;
-//							HRegion hPVIDefectRegion, hActualPVIDefectRegion;
-//
-//							_FCI_PVI_Inspection(hImageForPVI_Inspection, hRegionForPVI_Inspection, hImage,
-//								&hPVIDefectRegion,
-//								&hDebugImage, &hDebugRegion,
-//								hDefectCharecterstics, hContrast,
-//								hMinLength, hMinSize, hMinSquareSize, hMinCount,
-//								nStepDebug, nCurDoc,
-//								nDefCount+1,nArea,FALSE,&hPass, &hDebugMsg);
-//							if (nStepDebug) {
-//								StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
-//							}
-//							
-//							if (hPass == FALSE)
-//							{
-//								//m_arrayOverlayInspection.Add(hPVIDefectRegion, colorRed);
-//								//return -m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nID;
-//								HTuple hAllPVIDefectMinSize, hAllPVIDefectMinLength, hAllPVIDefectMinSqSize;
-//
-//								HTuple hMinMeanGVDiff = m_pPviInspectionSetup[nArea].nMinGVDiff;
-//								HTuple hIntensityRecheck = m_pPviInspectionSetup[nArea].nIntensity;
-//								BOOL bRecheckEn = m_pPviInspectionSetup[nArea].bPVIRecheckEnable;
-//
-//								PVI_Inspection_ReCheck(hImage, hTeachImage, hPVIDefectRegion, hRegionForPVI_Inspection,
-//									&hActualPVIDefectRegion, &hDebugImage, &hDebugRegion,
-//									nStepDebug, hLocationSelectedRow, hLocationSelectedCol, hInspectRotationAngle,
-//									hInspectShiftAlongRow, hInspectShiftAlongCol, hDefectCharecterstics, nDefCount + 1, nArea,
-//									hMinMeanGVDiff, hIntensityRecheck, bRecheckEn, FALSE,
-//									&hPass, &hAllPVIDefectMinSize, &hAllPVIDefectMinLength, &hAllPVIDefectMinSqSize, &hDebugMsg);
-//								
-//								if (nStepDebug) {
-//									StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
-//								}
-//
-//								//PVI Slot Connection Re-check
-//								if (m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckEnable && hPass == FALSE) {
-//									HTuple hConnectionCheckTopSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckTopDie;
-//									HTuple hConnectionCheckBottomSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckBottomDie;
-//									HTuple hConnectionCheckLeftSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckLeftDie;
-//									HTuple hConnectionCheckRightSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckRightDie;
-//
-//									HRegion hConcatSlot, hRectSlot;
-//									GenEmptyObj(&hConcatSlot);
-//									for (int nSlotIndex = 0; nSlotIndex < m_pPviInspectionSetup[nArea].nNumOfSlot; nSlotIndex++)
-//									{
-//										GenRectangle2(&hRectSlot, hSlot2DCenterPoints[2 * nSlotIndex], hSlot2DCenterPoints[2 * (nSlotIndex + 1) - 1],
-//											hSlotAngleConcat[nSlotIndex], hSlotSize[2 * nSlotIndex], hSlotSize[2 * (nSlotIndex + 1) - 1]);
-//										ConcatObj(hConcatSlot, hRectSlot, &hConcatSlot);
-//									}
-//									_FCI_PVI_CheckingSlot(hRegionForPVI_Inspection, hActualPVIDefectRegion, hConcatSlot, hImage, &hActualPVIDefectRegion,
-//										&hDebugImage, &hDebugRegion, nStepDebug, hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
-//										hInspectShiftAlongRow, hInspectShiftAlongCol, hConnectionCheckTopSide, hConnectionCheckBottomSide, hConnectionCheckLeftSide,
-//										hConnectionCheckRightSide, &hPass, &hDebugMsg);
-//
-//									if (m_pPviInspectionSetup[nArea].nNumOfSlot) {
-//										//***Project On Inspect Image: Method 1
-//										HTuple  hv_HomMat2DIdentity, hv_HomMat2DRotate, hv_HomMat2DTranslate;
-//										HomMat2dIdentity(&hv_HomMat2DIdentity);
-//										HomMat2dRotate(hv_HomMat2DIdentity, -hInspectRotationAngle, hDeviceCenterRow, hDeviceCenterCol,
-//											&hv_HomMat2DRotate);
-//										HomMat2dTranslate(hv_HomMat2DRotate, -hInspectShiftAlongRow, -hInspectShiftAlongCol, &hv_HomMat2DTranslate);
-//										AffineTransRegion(hConcatSlot, &hConcatSlot, hv_HomMat2DTranslate,
-//											"nearest_neighbor");
-//										m_arrayOverlayInspection.Add(hConcatSlot, colorYellow);
-//									}
-//									
-//								}
-//
-//								HTuple hCount = 0;
-//								Connection(hActualPVIDefectRegion, &hActualPVIDefectRegion);
-//								CountObj(hActualPVIDefectRegion, &hCount);
-//								if (0 != (hCount >= hMinCount)) {
-//									m_arrayOverlayInspection.Add(hActualPVIDefectRegion, colorRed);
-//									CString str;
-//									HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
-//									HTuple hValue = hAllPVIDefectMinSize*hResolution;
-//									double dValue = hValue.D();
-//									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinSize.D(), dValue);
-//									strArrayInspValues.Add(str);
-//
-//									hValue = hAllPVIDefectMinLength*hResolution;
-//									dValue = hValue.D();
-//									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinLength.D(), dValue);
-//									strArrayInspValues.Add(str);
-//
-//									hValue = hAllPVIDefectMinSqSize*hResolution;
-//									dValue = hValue.D();
-//									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinSqSize.D(), dValue);
-//									strArrayInspValues.Add(str);
-//
-//									//Store the defect information for Deep Learning Saving
-//									HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
-//									Connection(hActualPVIDefectRegion, &hActualPVIDefectRegion);
-//									RegionFeatures(hActualPVIDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
-//										,&hDefectInfo);
-//
-//									CleanDefectData(nCurDoc);
-//
-//									for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length()/6; nDefectIdx++) {
-//										m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6*nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
-//										m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx +3].D(),
-//																		hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
-//									}
-//
-//									if (pTrainingData->bCentralizedVerificationMode) {
-//										//Get region points
-//										HObject hRegionBorder;
-//										HTuple hDefectCount;
-//										CountObj(hActualPVIDefectRegion, &hDefectCount);
-//										int nDefectCount = hDefectCount.I();
-//										m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
-//										m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
-//										for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
-//											HObject hCurrentDefect;
-//											SelectObj(hActualPVIDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
-//											Boundary(hCurrentDefect, &hRegionBorder, "outer");
-//											GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
-//
-//											if (hCenterX.Length() > 0) {
-//												for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
-//													m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
-//													m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
-//												}
-//											}
-//										}
-//									}
-//
-//									return -m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nErrorCodeID;//Check with Nguyen lol
-//								}
-//							}
-//						}
-//					}
-//					//if (/*hPass == FALSE*/bPVIPassAll == FALSE) {
-//					//	//m_arrayOverlayInspection.Add(hPVIDefectRegion, colorRed);
-//					//	return -PVI_INSP;
-//				}	//}
-//			}
-//		}
+	else if(bRegionInsp) {
+	
+		//// Find location params
+		HRegion hDeviceLocationSelected;
+		HTuple hIsSelected, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol;
+		HTuple hCount, hArea, hDeviceCenterRow, hDeviceCenterCol;
 
-		if (m_EncapMagnusPam.bEnable && (nCurFOV == 1 || nCurFOV==4) && nCurDoc==1)
-		{ 
+		_FCI_Extract_LocationParameterData(pTrainingData->hTupleProjectionParam, pTrainingData->hTupleTeachDoc,
+			pTrainingData->hTupleEdgeTeachTuple, pTrainingData->hTupleDatumTeachTuple, nCurDoc,
+			&hIsSelected, &hInspectRotationAngle, &hInspectShiftAlongRow, &hInspectShiftAlongCol);
 
-
-			// get Two Point Encap Location////////
-
-			int nThresh_Min_magnus = m_TrainingData.nThreshMin_EncapManus;
-			int nThresh_Max_magnus = m_TrainingData.nThreshMax_EncapManus;
-			int nArea_Object_magnus = m_TrainingData.nArea_Object_EncapManus;
-			int nHeight_Object_magnus = m_TrainingData.nHeight_Object_magnus;
-			int nWidth_Object_magnus = m_TrainingData.nWidth_Object_magnus;
-			HRegion hThreshold_Region_magnus;
-			HObject hDeviceLocation_magnus, hSelect_DeviceLocation_magnus;
-			HTuple hDefectInfo_magnus;
-
-			Threshold(hImage, &hThreshold_Region_magnus, nThresh_Min_magnus, nThresh_Max_magnus);
-			Connection(hThreshold_Region_magnus, &hDeviceLocation_magnus);
-			//SelectShape(hDeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "area", "and", nArea_Object_magnus, 9999999);
-			SelectShape(hDeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "height", "and", nHeight_Object_magnus, nHeight_Object_magnus+400);
-			SelectShape(hSelect_DeviceLocation_magnus, &hSelect_DeviceLocation_magnus, "width", "and", nWidth_Object_magnus, nWidth_Object_magnus+400);
-
-			HRegion hSelect_DeviceLocation_obj_magnus;
-			SelectObj(hSelect_DeviceLocation_magnus, &hSelect_DeviceLocation_obj_magnus, 1);
-
-			HRegion hBoundary_DeviceLocation_magnus;
-			Boundary(hSelect_DeviceLocation_magnus, &hBoundary_DeviceLocation_magnus, "inner");
-			HTuple hRows_Device_magnus, hCols_Device_magnus;
-			GetRegionPoints(hBoundary_DeviceLocation_magnus, &hRows_Device_magnus, &hCols_Device_magnus);
-
-			HTuple  nbottom_DeviceLocationEncap_magnus,
-				ntop_DeviceLocationEncap_magnus,
-				nright_DeviceLocationEncap_magnus,
-				nleft_DeviceLocationEncap_magnus;
-			TupleMax(hRows_Device_magnus, &nbottom_DeviceLocationEncap_magnus);
-			TupleMin(hRows_Device_magnus, &ntop_DeviceLocationEncap_magnus);
-			TupleMax(hCols_Device_magnus, &nright_DeviceLocationEncap_magnus);
-			TupleMin(hCols_Device_magnus, &nleft_DeviceLocationEncap_magnus);
-
-			HTuple nImage_Width, nImage_Height;
-			GetImageSize(hImage, &nImage_Width, &nImage_Height);
-
-			//////////// Get rectangle encap bottom//////////////////
-			CRect hRect_EncapLocation_magnus(100, 100, 400, 400);
-			CRect hRect_CropSmoothEncap_magnus(100, 100, 400, 400);
-			CRect hRect_CropNoSmoothEncap_magnus(100, 100, 400, 400);
-			CRect hRect_CropRemoveBlackLine_magnus(100, 100, 400, 400);
-
-
-			if (nCurFOV == 1)// top
-			{
-				if ((int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[0] > 0)
-					hRect_EncapLocation_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[0];
-				else hRect_EncapLocation_magnus.left = 0;
-				
-				if ((int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[0] < nImage_Width)
-					hRect_EncapLocation_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[0];
-				else hRect_EncapLocation_magnus.right = (int)nImage_Width;
-
-				hRect_EncapLocation_magnus.bottom = (int)ntop_DeviceLocationEncap_magnus;
-
-				if (ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0] > 0
-					&& ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0] < (int)nImage_Height)
-					hRect_EncapLocation_magnus.top = (int)ntop_DeviceLocationEncap_magnus - m_TrainingData.nCrop_ExpandHeight_magnus[0];
-				else hRect_EncapLocation_magnus.top = 0;
-
-				hRect_CropSmoothEncap_magnus = hRect_EncapLocation_magnus;
-				hRect_CropNoSmoothEncap_magnus = hRect_EncapLocation_magnus;
-				hRect_CropSmoothEncap_magnus.top = hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_Smooth_EncapManus[0];
-				hRect_CropNoSmoothEncap_magnus.bottom = hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_Smooth_EncapManus[0];
-			
-				hRect_CropRemoveBlackLine_magnus.top = hRect_EncapLocation_magnus.top;
-				hRect_CropRemoveBlackLine_magnus.bottom = hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_RemoveBLHeight_magnus[0];
-				hRect_CropRemoveBlackLine_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLLeft_magnus[0];
-				hRect_CropRemoveBlackLine_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLRight_magnus[0];
-			
-			}
-			else if (nCurFOV == 4)// bottom
-			{
-				if ((int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[1] > 0)
-					hRect_EncapLocation_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandLeft_magnus[1];
-				else hRect_EncapLocation_magnus.left = 0;
-				
-				if ((int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[1] < nImage_Width)
-					hRect_EncapLocation_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandRight_magnus[1];
-				else hRect_EncapLocation_magnus.right = (int)nImage_Width;
-
-				hRect_EncapLocation_magnus.top = (int)nbottom_DeviceLocationEncap_magnus;
-
-				if ((int)ntop_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1] < nImage_Height &&
-					(int)ntop_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1]>0)
-					hRect_EncapLocation_magnus.bottom = (int)nbottom_DeviceLocationEncap_magnus + m_TrainingData.nCrop_ExpandHeight_magnus[1];
-				else hRect_EncapLocation_magnus.bottom = (int)nImage_Height;
-
-				hRect_CropSmoothEncap_magnus = hRect_EncapLocation_magnus;
-				hRect_CropNoSmoothEncap_magnus = hRect_EncapLocation_magnus;
-				hRect_CropSmoothEncap_magnus.bottom = hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_Smooth_EncapManus[1];
-				hRect_CropNoSmoothEncap_magnus.top =  hRect_EncapLocation_magnus.top + m_TrainingData.nCrop_Smooth_EncapManus[1];
-				
-				hRect_CropRemoveBlackLine_magnus.bottom = hRect_EncapLocation_magnus.bottom;
-				hRect_CropRemoveBlackLine_magnus.top = hRect_EncapLocation_magnus.bottom - m_TrainingData.nCrop_RemoveBLHeight_magnus[1];
-				hRect_CropRemoveBlackLine_magnus.left = (int)nleft_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLLeft_magnus[1];
-				hRect_CropRemoveBlackLine_magnus.right = (int)nright_DeviceLocationEncap_magnus + m_TrainingData.nCrop_RemoveBLRight_magnus[1];
-			
-			}
-			HRegion hRectangle_DeviceLocation_magnus;
-			GenRectangle1(&hRectangle_DeviceLocation_magnus,
-				hRect_EncapLocation_magnus.top,
-				hRect_EncapLocation_magnus.left,
-				hRect_EncapLocation_magnus.bottom,
-				hRect_EncapLocation_magnus.right);
-			HImage hCrop_image_magnus;
-			ReduceDomain(hImage, hRectangle_DeviceLocation_magnus, &hCrop_image_magnus);
-
-			/////////// Threshold white and black region///////////////
-
-			HRegion hBlack_Region_magnus, hWhite_Region_magnus;
-			int nThreshMin_Black_magnus = m_TrainingData.nThreshMin_Black_EncapManus;
-			int nThreshMax_Black_magnus = m_TrainingData.nThreshMax_Black_EncapManus;
-			int nThreshMin_White_magnus = m_TrainingData.nThreshMin_White_EncapManus;
-			int nThreshMax_White_magnus = m_TrainingData.nThreshMax_White_EncapManus;
-			Threshold(hCrop_image_magnus, &hBlack_Region_magnus, nThreshMin_Black_magnus, nThreshMax_Black_magnus);
-			Threshold(hCrop_image_magnus, &hWhite_Region_magnus, nThreshMin_White_magnus, nThreshMax_White_magnus);
-
-			/////////// Dilate White Region to remove intersection line between black and white region ///////////
-
-			HRegion hDilation_WhiteRegion_magnus;
-			int nX_Dilation_White_magnus = m_TrainingData.nDilateX_EncapManus;
-			int nY_Dilation_White_magnus = m_TrainingData.nDilateY_EncapManus;
-			DilationRectangle1(hWhite_Region_magnus, &hDilation_WhiteRegion_magnus, nX_Dilation_White_magnus, nY_Dilation_White_magnus);
-
-			/////////// Union White and Black region//////////////
-			
-			HRegion hRegion_CropRemoveBlackLine_magnus;
-			GenRectangle1(&hRegion_CropRemoveBlackLine_magnus,
-				hRect_CropRemoveBlackLine_magnus.top,
-				hRect_CropRemoveBlackLine_magnus.left,
-				hRect_CropRemoveBlackLine_magnus.bottom,
-				hRect_CropRemoveBlackLine_magnus.right);
-			HRegion hUnionRegion_WhiteBlack_magnus, hUnionRegion_WhiteBlackBL_magnus;
-			Union2(hBlack_Region_magnus, hDilation_WhiteRegion_magnus, &hUnionRegion_WhiteBlack_magnus);
-			Union2(hUnionRegion_WhiteBlack_magnus, hRegion_CropRemoveBlackLine_magnus, &hUnionRegion_WhiteBlackBL_magnus);
-
-			//int nShapeAreaRemove_magnus = m_TrainingData.nArea_Object_EncapManus;
-			//HRegion hSelectRegion_BW_magnus;
-			//SelectShape(hUnionRegion_WhiteBlack_magnus, &hSelectRegion_BW_magnus, "width", "and", 400, 99999);
-			//HRegion hFillupRegion_BW_magnus;
-			//FillUp(hUnionRegion_WhiteBlack_magnus, &hFillupRegion_BW_magnus);
-			//
-
-			////////// Remove White and black region /////////////
-			HRegion hDiffRegion_magnus;
-			Difference(hRectangle_DeviceLocation_magnus, hUnionRegion_WhiteBlackBL_magnus, &hDiffRegion_magnus);
-
-			
-
-			//////////////Remove top black line ( filter)
-			HRegion hRegionOpening_fill_magnus;
-			int nX_Opening_fill_magnus = m_TrainingData.nOpeningX_EncapManus;
-			int nY_Opening_fill_magnus = m_TrainingData.nOpeningY_EncapManus;
-			OpeningRectangle1(hDiffRegion_magnus, &hRegionOpening_fill_magnus, nX_Opening_fill_magnus, nY_Opening_fill_magnus);
-
-			///////////////////////////////// Select shape////////
-
-			HRegion hConnection_opening_magnus, hRegionOpening_Select_magnus, hRegionOpening_Circle_magnus;
-			int nValueOpening_Circle_magnus = m_TrainingData.nValue_OpeningCircle_magnus;
-			Connection(hRegionOpening_fill_magnus, &hConnection_opening_magnus);
-			SelectShape(hConnection_opening_magnus, &hRegionOpening_Select_magnus, "width", "and", 200, 9999);
-			HRegion hFillupRegion_diff_magnus;
-			FillUp(hRegionOpening_Select_magnus, &hFillupRegion_diff_magnus);		
-			OpeningCircle(hFillupRegion_diff_magnus, &hRegionOpening_Circle_magnus, nValueOpening_Circle_magnus);
-
-			//////////////////// gen Crop smooth contour to intersection/////////////
-			HXLD hContour_Encap_magnus, hCropContour_After_magnus;
-			HXLD hCropContour_BeforeSmooth_magnus;
-
-			/// Opening circle before smooth
-			HRegion hRegionOpening_CircleCrop_magnus;
-			OpeningCircle(hRegionOpening_Circle_magnus, &hRegionOpening_CircleCrop_magnus, m_TrainingData.nValue_OpeningCircleCrop_magnus);
-			// Crop contour to smooth
-			int nValueSmooth_Crop_magnus = m_TrainingData.nValue_Smooth_EncapMagnus;
-			GenContourRegionXld(hRegionOpening_CircleCrop_magnus, &hContour_Encap_magnus, "center");
-			// Smooth
-			//int nValueSmooth_Crop_magnus = m_TrainingData.nValue_Smooth_EncapMagnus;
-			//GenContourRegionXld(hRegionOpening_Circle_magnus, &hContour_Encap_magnus, "center");
-			//CRect hRect_CropSmoothEncap_magnus = m_TrainingData.hRect_CropSmoothEncap_magnus;
-			CropContoursXld(hContour_Encap_magnus, &hCropContour_BeforeSmooth_magnus,
-				hRect_CropSmoothEncap_magnus.top,
-				hRect_CropSmoothEncap_magnus.left,
-				hRect_CropSmoothEncap_magnus.bottom,
-				hRect_CropSmoothEncap_magnus.right, "true");
-
-			SmoothContoursXld(hContour_Encap_magnus, &hCropContour_After_magnus, 2 * nValueSmooth_Crop_magnus + 1);
-			/////// Gen region smooth
-			HXLD hRegionContour_Smooth_magnus;
-			GenRegionContourXld(hCropContour_After_magnus, &hRegionContour_Smooth_magnus, "filled");
-			HRegion hRegionInter_CropSmooth_magnus;
-			Intersection(hRegionContour_Smooth_magnus, hRegionOpening_Circle_magnus, &hRegionInter_CropSmooth_magnus);
-
-			//////////////////////// Get region no smooth  //////////
-
-			HRegion hRegionRectangle_CropNoSmooth_magnus;
-			//	CRect hRect_CropNoSmoothEncap_magnus = m_TrainingData.hRect_CropNoSmoothEncap_magnus;
-			GenRectangle1(&hRegionRectangle_CropNoSmooth_magnus,
-				hRect_CropNoSmoothEncap_magnus.top,
-				hRect_CropNoSmoothEncap_magnus.left,
-				hRect_CropNoSmoothEncap_magnus.bottom,
-				hRect_CropNoSmoothEncap_magnus.right);
-			HRegion hRegionInter_Nosmooth_magnus, hRegionUnion_2RegionSmooth_magnus, hRegionBoundary_2Region_Smooth_magnus;
-			Intersection(hRegionOpening_Circle_magnus, hRegionRectangle_CropNoSmooth_magnus, &hRegionInter_Nosmooth_magnus);
-
-			//////////// Union Smooth and NoSmooth Region
-
-			Union2(hRegionInter_Nosmooth_magnus, hRegionInter_CropSmooth_magnus, &hRegionUnion_2RegionSmooth_magnus);
-			OpeningCircle(hRegionUnion_2RegionSmooth_magnus, &hRegionUnion_2RegionSmooth_magnus, nValueOpening_Circle_magnus);
-			Boundary(hRegionUnion_2RegionSmooth_magnus, &hRegionBoundary_2Region_Smooth_magnus, "inner");
-			m_arrayOverlayInspection.Add(hRegionUnion_2RegionSmooth_magnus, colorYellow);
+		if (0 != (hIsSelected == 0))
+		{
+			if(nCurTrack == 2)
+				return 0;// -DEVICE_LOCATION;
+			else
+				return -DEVICE_LOCATION;
+		}
 		
+		HTuple hConcatArea, hRow2, hColumn2, hMaxArea;
+		AreaCenter(pTrainingData->hObjectDeviceLocation, &hConcatArea, &hRow2, &hColumn2);
+		if (hConcatArea.TupleLength() > 0)
+			TupleMax(hConcatArea, &hMaxArea);
+		
+		if (0 != (hMaxArea == 0))
+		{
+			if (nCurTrack == 2)
+				return 0;// -DEVICE_LOCATION;
+			else
+				return -DEVICE_LOCATION;
+		}
+	
+		CountObj(pTrainingData->hObjectDeviceLocation, &hCount);
+		_FCI_Select_DeviceLocation(pTrainingData->hObjectDeviceLocation,
+			&hDeviceLocationSelected,
+			nCurDoc, &hDeviceCenterRow, &hDeviceCenterCol);
+
+		
+		CountObj(hDeviceLocationSelected, &hCount);
+		if (hCount < 1)
+			return 0;
+
+		//AreaCenter(hDeviceLocationSelected, &hArea, &hDeviceCenterRow, &hDeviceCenterCol);
+
+		/*if(hArea == 0)
+			return -DEVICE_LOCATION;*/
+
+		//// Tilt Insp (FOV - first & last; Doc - top(3rd intensity) & side(1st intensity)) ////
+		if (m_TiltInspParm.bEnable && nCurTrack != 1 && (nCurFOV == 1 || nCurFOV == nTotalFOV)) {
+			HRegion hTiltRgn, hInspTiltRgnPortion;
+			HTuple hContrast, hDistanceForTiltInsp, hTiltInspImgIndex;
+			HTuple hTiltHeight;
+			HTuple hTiltRgnChar, hTiltRgnHeight, hMeanGreyValue, hTiltRectRow, hTiltRectCol;
+			HTuple hDebugMsgOutTilt;
+			HImage hDebugImageOutTilt;
+			HRegion hDebugRegionOutTilt;
+
+			hTiltRgnChar = hTiltRgnHeight = hMeanGreyValue = hTiltRectRow = hTiltRectCol = HTuple();
+
+			//hTiltInspImgIndex = m_TiltInspParm.nImageIndex - 1;
+			//if (nCurDoc == hTiltInspImgIndex) {
+				hContrast = m_TiltInspParm.nContrast;
+				hDistanceForTiltInsp = m_TiltInspParm.nDistanceForTiltInsp / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+
+				//hTiltRgnChar = m_TiltInspParm.nRegionChar;
+				//hTiltRgnHeight = m_TiltInspParm.nRegionHeight;
+				//hMeanGreyValue = m_TiltInspParm.nMeanGreyValue;
+
+				HTuple hRow1, hRow2, hCol1, hCol2, hXShift, hYShift;
+				hRow1 = m_TrainingData.m_rectTilt.top;
+				hRow2 = m_TrainingData.m_rectTilt.bottom;
+				hCol1 = m_TrainingData.m_rectTilt.left;
+				hCol2 = m_TrainingData.m_rectTilt.right;
+				/*hXShift = m_TrainingData.m_nXShift;
+				hYShift = m_TrainingData.m_nYShift;*/
+
+				TupleConcat(hTiltRectRow, hRow1.TupleConcat(hRow2), &hTiltRectRow);
+				TupleConcat(hTiltRectCol, hCol1.TupleConcat(hCol2), &hTiltRectCol);
+
+				_FCI_Finding_TiltInspectionParameter(hImage, hDeviceLocationSelected,
+													&hTiltRgn, &hInspTiltRgnPortion,&hDebugImageOutTilt,&hDebugRegionOutTilt,nStepDebug,
+													hTiltRectRow, hTiltRectCol, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol,
+													hContrast, hDistanceForTiltInsp,
+													nCurFOV, nTotalFOV, nCurTrack + 1,
+													&hTiltHeight,&hDebugMsgOutTilt);
+
+				TupleConcat(pInspData->hTiltHeight, hTiltHeight, &pInspData->hTiltHeight);
+
+				m_arrayOverlayInspection.Add(hTiltRgn, colorGreen);
+
+				if (nStepDebug) {
+					StepDebug(hDebugImageOutTilt, hDebugRegionOutTilt, colorCyan, hDebugMsgOutTilt, bRegionInsp);
+				}
+				int nCount = pInspData->hTiltHeight.Length();
+				OutputDebugLogTo(9, TRUE, "Tilt Insp:: Tilt Height Count %d", nCount);//// for testing
+			//}
+
+			int nCurrentFOV = bDirForTiltInsp ? nTotalFOV : 1;
+			if (nCurTrack == 2 && nCurDoc == 0 && nCurFOV == nCurrentFOV) {	//// Side Camera; First Intensity; Last/first FOV ////
+				HTuple hTiltTolerance, hAngleOfSideView, hPass, hValue;
+				HTuple hResolutionYTop, hResolutionYSide;
+				HTuple hTopHeight1, hTopHeight2;
+				HTuple hSideHeight1, hSideHeight2;
+
+				hTiltTolerance = m_TiltInspParm.nToleranceSide;
+				hAngleOfSideView = m_TiltInspParm.nAngleOfSideView;
+
+				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
+					hTopHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[0] : pInspData->hTiltHeight[2];
+				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
+					hSideHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[1] : pInspData->hTiltHeight[3];
+				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
+					hTopHeight2= bDirForTiltInsp ? pInspData->hTiltHeight[2] : pInspData->hTiltHeight[0];
+				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
+					hSideHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[3] : pInspData->hTiltHeight[1];
+
+				if (pCalibData->hResolutionYInput[0].Length() > 0) {
+					hResolutionYTop = pCalibData->hResolutionYInput[0];
+					double dValue = hResolutionYTop.D();
+					OutputDebugLogTo(8, TRUE, "%s Resolution Top Y [%.4f]", strOutPutLog, dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("%s Top Y [%.4f]", strOutPutLog, dValue);
+					strArrayInspValues.Add(str);
+				}
+
+				if (pCalibData->hResolutionYInput[1].Length() > 0) {
+					hResolutionYSide = pCalibData->hResolutionYInput[1];
+					double dValue = hResolutionYSide.D();
+					OutputDebugLogTo(8, TRUE, "%s Resolution Side Y [%.4f]", strOutPutLog, dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("%s Resolution Side Y [%.4f]", strOutPutLog, dValue);
+					strArrayInspValues.Add(str);
+				}
+
+				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
+				{
+					//hTopHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[0] : pInspData->hTiltHeight[2];
+					HTuple hValue = hTopHeight1*hResolutionYTop;
+					double dValue = hValue.D();
+					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
+					strArrayInspValues.Add(str);
+				}
+				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
+				{
+					//hSideHeight1 = bDirForTiltInsp ? pInspData->hTiltHeight[1] : pInspData->hTiltHeight[3];
+					HTuple hValue = hSideHeight1*hResolutionYSide;
+					double dValue = hValue.D();
+					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV,strOutPutLog, hSideHeight1.D(), dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight1.D(), dValue);
+					strArrayInspValues.Add(str);
+				}
+				if (pInspData->hTiltHeight[0].Length() > 0 || pInspData->hTiltHeight[2].Length() > 0)
+				{
+					//hTopHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[2] : pInspData->hTiltHeight[0];
+					HTuple hValue = hTopHeight2*hResolutionYTop;
+					double dValue = hValue.D();
+					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight2.D(), dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("Fov[%d] %s Top Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hTopHeight2.D(), dValue);
+					strArrayInspValues.Add(str);
+				}
+				if (pInspData->hTiltHeight[1].Length() > 0 || pInspData->hTiltHeight[3].Length() > 0)
+				{
+					//hSideHeight2 = bDirForTiltInsp ? pInspData->hTiltHeight[3] : pInspData->hTiltHeight[1];
+					HTuple hValue = hSideHeight2*hResolutionYSide;
+					double dValue = hValue.D();
+					OutputDebugLogTo(8, TRUE, "Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hSideHeight2.D(), dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("Fov[%d] %s Side Height %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hSideHeight2.D(), dValue);
+					strArrayInspValues.Add(str);
+				}
+
+				_FCI_Tilt_Inspection(hTopHeight1, hTopHeight2, hResolutionYTop,
+									hSideHeight1, hSideHeight2, hResolutionYSide,
+									hTiltTolerance, hAngleOfSideView,
+									&hPass, &hValue);
+				
+				ClearInspParam(pInspData, TRUE); // JY TESTING
+				
+				if (hValue.Length() > 0) {
+					double dValue = hValue.D();
+					OutputDebugLogTo(8, TRUE, "%s Tilt Inspection hValue [%.4f]", strOutPutLog,dValue);
+					//// added to display in Output Log - data tab ////
+					CString str;
+					str.Format("%s Tilt Inspection hValue [%.4f]", strOutPutLog,dValue);
+					strArrayInspValues.Add(str);
+				}
+
+				if (hPass == FALSE)
+					return -TILT_INSP;
+			}
+		}
+
+		//// Encap Insp ////
+		//HTuple hImgIndex = m_EncapParm.nImageIndex - 1;
+		HTuple hImgIndex = -1;
+		//if (m_TrainingData.hvec_TupleVectorEncap.GetSize() > 0)
+		//	if (m_TrainingData.hvec_TupleVectorEncap[14].Length() > 0)
+		//		hImgIndex = ((m_TrainingData.hvec_TupleVectorEncap[/*nIndexEncap*/14][0]) /*- 1*/);
+		if (m_EncapParm.bEnable) {
+
+			if(!m_TrainingData.bEnableEncap)
+				return -ENCAP_INSUFFICIENT;
+
+			int nEncapIndex = 0;
+			/*HTuple hMinEncapContrast = m_TrainingData.hvec_TupleVectorEncap.GetAt(nEncapIndex++);
+			HTuple hMaxEncapContrast = m_TrainingData.hvec_TupleVectorEncap.GetAt(nEncapIndex++);*/
+			HTuple hMinEncapContrast = m_TrainingData.nEncapMinContrast;
+			HTuple hMaxEncapContrast = m_TrainingData.nEncapMaxContrast;
+
+			HTuple hWireColor;
+			HImage hDebugImg;
+			HRegion hEncapLocation, hDebugRgn;
+			HTuple hIsEncap, IsPass, hIsPassForInsufficient, hIsPassForExcess, hDebugMsg;
+
+			hWireColor = nCurTrack;
+
+			HTuple hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2;
+			hEncapRow1 = m_TrainingData.m_rectEncap[0].top;
+			hEncapCol1 = m_TrainingData.m_rectEncap[0].left;
+			hEncapRow2 = m_TrainingData.m_rectEncap[0].bottom;
+			hEncapCol2 = m_TrainingData.m_rectEncap[0].right;
+
+			HRegion hEncapTeachRegion, hProjectedRegion;
+			HTuple hDebugMsgOutEncap;
+			HImage hDebugImageOutEncap;
+			HRegion hDebugRegionOutEncap;
+			HTuple hMessage;
+	
+			GenRectangle1(&hEncapTeachRegion, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
+
+			//Encap Tracing Mask
+			HRegion hConcatEncapMaskRgn;
+			GenEmptyObj(&hConcatEncapMaskRgn);
+			/*for (int nMask = 0; nMask < m_TrainingData.nEncapTracingMaskNumber; nMask++) {
+				HRegion hEncapTracingMask;
+				hEncapRow1 = m_TrainingData.m_rectMaskEncapTracing[nMask].top;
+				hEncapCol1 = m_TrainingData.m_rectMaskEncapTracing[nMask].left;
+				hEncapRow2 = m_TrainingData.m_rectMaskEncapTracing[nMask].bottom;
+				hEncapCol2 = m_TrainingData.m_rectMaskEncapTracing[nMask].right;
+				GenRectangle1(&hEncapTracingMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
+				ConcatObj(hConcatEncapMaskRgn, hEncapTracingMask, &hConcatEncapMaskRgn);
+			}*/
+			//HRegion hConcatEncapMaskRgn;
+			HTuple hEncapPolygonPoints;
+			GenEmptyObj(&hConcatEncapMaskRgn);
+			for (int nMask = 0; nMask < m_TrainingData.nEncapTracingMaskNumber; nMask++) {
+				HRegion hEncapTracingMask;
+				hEncapPolygonPoints = HTuple();
+				if (m_TrainingData.nEncapTracingMaskType[nMask] == RECTANGLE) {
+					hEncapRow1 = m_TrainingData.m_rectMaskEncapTracing[nMask].top;
+					hEncapCol1 = m_TrainingData.m_rectMaskEncapTracing[nMask].left;
+					hEncapRow2 = m_TrainingData.m_rectMaskEncapTracing[nMask].bottom;
+					hEncapCol2 = m_TrainingData.m_rectMaskEncapTracing[nMask].right;
+					GenRectangle1(&hEncapTracingMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
+				}
+				else if (m_TrainingData.nEncapTracingMaskType[nMask] == ECLIPSE) {
+					GenEllipse(&hEncapTracingMask, m_TrainingData.m_rectMaskEncapTracing[nMask].CenterPoint().y, m_TrainingData.m_rectMaskEncapTracing[nMask].CenterPoint().x, 0,
+						m_TrainingData.m_rectMaskEncapTracing[nMask].Width() / 2, m_TrainingData.m_rectMaskEncapTracing[nMask].Height() / 2);
+				}
+				else if (m_TrainingData.nEncapTracingMaskType[nMask] == POLYGON) {
+					HTuple hPoint;
+					HTuple hRows, hCols;
+					for (int nPointId = 0; nPointId < m_TrainingData.nEncapTracingPolygonPointNumber[nMask]; nPointId++) {
+						TupleConcat(hRows, m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].y, &hRows);
+						TupleConcat(hCols, m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].x, &hCols);
+
+						hPoint.Clear();
+						hPoint.Append(m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].y);
+						hPoint.Append(m_TrainingData.m_EncapTracingPolygonPointArea[nMask][nPointId].x);
+
+						//TupleConcat(hEncapPolygonPoints, hPoint, &hEncapPolygonPoints);
+					}
+					GenRegionPolygonFilled(&hEncapTracingMask, hRows, hCols);
+				}
+				ConcatObj(hConcatEncapMaskRgn, hEncapTracingMask, &hConcatEncapMaskRgn);
+			}
+
+			if (m_TrainingData.nEncapTracingMaskNumber > 0) {
+				HRegion hFitEncapTracingMaskRegion;
+				GenEmptyObj(&hFitEncapTracingMaskRegion);
+				Union1(hConcatEncapMaskRgn, &hFitEncapTracingMaskRegion);
+				Difference(hEncapTeachRegion, hFitEncapTracingMaskRegion, &hEncapTeachRegion);
+
+				//m_arrayOverlayTeach.Add(hFitEncapTracingMaskRegion, colorRed);
+			}
+
+			_FCI_Encap_RegionProjection(hImage,hEncapTeachRegion,
+				&hProjectedRegion,&hDebugImageOutEncap,&hDebugRegionOutEncap,nStepDebug,
+				hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, 
+				hInspectShiftAlongRow, hInspectShiftAlongCol,&hDebugMsgOutEncap);
+			
+			if (nStepDebug) {
+				StepDebug(hDebugImageOutEncap, hDebugRegionOutEncap, colorCyan, hDebugMsgOutEncap, bRegionInsp);
+			}
+			//m_arrayOverlayInspection.Add(hProjectedRegion, colorOrange);
+
+			_FCI_Inspect_EncapLocation(hImage, hDeviceLocationSelected, hProjectedRegion,
+										&hEncapLocation,
+										&hDebugImg, &hDebugRgn,
+										nStepDebug, hWireColor, hMinEncapContrast, hMaxEncapContrast,
+										&hIsEncap, &hDebugMsg);
+
+			if (nStepDebug) {
+				StepDebug(hDebugImg, hDebugRgn, colorCyan, hDebugMsg, bRegionInsp);
+			}
+			HTuple hErosionOffsetBG = m_EncapParm.dErosionOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+			ErosionCircle(hEncapLocation, &hEncapLocation, hErosionOffsetBG);
+			ReduceDomain(hImage, hEncapLocation, &m_DefectData[nCurDoc].EncapProcessedBackGround);
+			HRegion hRegionBG;
+			Threshold(m_DefectData[nCurDoc].EncapProcessedBackGround, &hRegionBG, 2, 255);
+			HTuple hRow1, hColumn1, hRow2, hColumn2;
+			SmallestRectangle1(hRegionBG, &hRow1, &hColumn1, &hRow2, &hColumn2);
+			CropRectangle1(m_DefectData[nCurDoc].EncapProcessedBackGround, &m_DefectData[nCurDoc].EncapProcessedBackGround, hRow1-50, hColumn1-50, hRow2+50, hColumn2+50);
+			if (hIsEncap == TRUE) {
+				m_arrayOverlayInspection.Add(hEncapLocation, colorOrange);
+
+				//Deep Learning Mode: 0: Classification, 1: Recognition
+				if (m_EncapParm.bEnableEncapSurface)
+				{
+					HTuple hDebugMsgOutEncapDefect;
+					HImage hDebugImageOutEncapDefect;
+					HRegion hDebugRegionOutEncapDefect;
+					HRegion hEncapDefectRegion;
+					HTuple hErosionOffset, hMaxLayOnAllowedPercentage;
+					hErosionOffset = m_EncapParm.dErosionOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMaxLayOnAllowedPercentage = m_EncapParm.dMaxLayOnAllowedPercentage;
+
+					//Encap Surface Mask
+					HRegion hConcatEncapSurfaceMaskRgn;
+					GenEmptyObj(&hConcatEncapSurfaceMaskRgn);
+					for (int nMask = 0; nMask < m_TrainingData.nEncapSurfaceMaskNumber; nMask++) {
+						HRegion hEncapSurfaceMask;
+						hEncapRow1 = m_TrainingData.m_rectMaskEncapSurface[nMask].top;
+						hEncapCol1 = m_TrainingData.m_rectMaskEncapSurface[nMask].left;
+						hEncapRow2 = m_TrainingData.m_rectMaskEncapSurface[nMask].bottom;
+						hEncapCol2 = m_TrainingData.m_rectMaskEncapSurface[nMask].right;
+						GenRectangle1(&hEncapSurfaceMask, hEncapRow1, hEncapCol1, hEncapRow2, hEncapCol2);
+						ConcatObj(hConcatEncapSurfaceMaskRgn, hEncapSurfaceMask, &hConcatEncapSurfaceMaskRgn);
+					}
+
+					if (m_TrainingData.nEncapSurfaceMaskNumber > 0) {
+						HRegion hFitEncapSurfaceMaskRegion;
+						GenEmptyObj(&hFitEncapSurfaceMaskRegion);
+						Union1(hConcatEncapSurfaceMaskRgn, &hFitEncapSurfaceMaskRegion);
+
+						_FCI_Encap_RegionProjection(hImage, hFitEncapSurfaceMaskRegion,
+							&hFitEncapSurfaceMaskRegion, &hDebugImageOutEncap, &hDebugRegionOutEncap, 0,
+							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+							hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutEncap);
+						Difference(hEncapLocation, hFitEncapSurfaceMaskRegion, &hEncapLocation);
+						m_arrayOverlayInspection.Add(hFitEncapSurfaceMaskRegion, colorYellow);
+					}
+
+
+					if ( pTrainingData->bEnableDLModelInspect &&  pDeepLearningModule->m_nDeepLearningMode == 1) {
+
+						HTuple hDebugMsgOutEncapRP;
+						HImage hDebugImageOutEncapRP;
+						HRegion hEncapInspLocation;
+						HRegion hDebugRegionOutEncapRP;
+						HRegion hRect, hProjectedEncapRegion;
+						HTuple hRectRow, hRectCol;
+						GenEmptyObj(&hEncapInspLocation);
+						for (int i = 1; i < 3; i++) {
+							TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].top, &hRectRow);
+							TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].bottom, &hRectRow);
+							TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].left, &hRectCol);
+							TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].right, &hRectCol);
+							GenRectangle1(&hRect, m_TrainingData.m_rectEncap[i].top, m_TrainingData.m_rectEncap[i].left,
+								m_TrainingData.m_rectEncap[i].bottom, m_TrainingData.m_rectEncap[i].right);
+							ConcatObj(hEncapInspLocation, hRect, &hEncapInspLocation);
+						}
+
+						_FCI_Encap_InnOuter_RgnProjection(hImage, hEncapInspLocation,
+							&hProjectedEncapRegion, &hDebugImageOutEncapRP, &hDebugRegionOutEncapRP, nStepDebug,
+							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow,
+							hInspectShiftAlongCol, &hDebugMsgOutEncapRP);
+
+
+						m_arrayOverlayInspection.Add(hProjectedEncapRegion, colorCyan);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutEncapRP, hDebugRegionOutEncapRP, colorCyan, hDebugMsgOutEncapRP, bRegionInsp);
+						}
+
+						_FCI_Inspect_EncapDefects(hImage, hEncapLocation, hProjectedEncapRegion,
+							&IsPass, &hIsPassForInsufficient, &hIsPassForExcess);
+
+
+						if (IsPass == FALSE) {
+							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+							Connection(hEncapLocation, &hEncapLocation);
+							RegionFeatures(hEncapLocation, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+								, &hDefectInfo);
+
+							CleanDefectData(nCurDoc);
+							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+							}
+
+							if (pTrainingData->bCentralizedVerificationMode) {
+								//Get region points
+								HObject hRegionBorder, hRegionUnion;
+								Union1(hEncapLocation, &hRegionUnion);
+								Boundary(hRegionUnion, &hRegionBorder, "outer");
+								GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+								
+								if (hCenterX.Length() > 0) {
+									m_DefectData[nCurDoc].arrayDefectX.resize(1);
+									m_DefectData[nCurDoc].arrayDefectY.resize(1);
+									for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+										m_DefectData[nCurDoc].arrayDefectX[0].push_back(hCenterX[nPoint].I());
+										m_DefectData[nCurDoc].arrayDefectY[0].push_back(hCenterY[nPoint].I());
+									}
+								}
+
+								//Inner and outer Encap Rectangle
+								Connection(hProjectedEncapRegion, &hProjectedEncapRegion);
+								RegionFeatures(hProjectedEncapRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+									, &hDefectInfo);
+								for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+									m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+									m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+										hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+								}
+
+								HTuple hDefectCount;
+								CountObj(hProjectedEncapRegion, &hDefectCount);
+								int nEncapLocCount = hDefectCount.I();
+								if (nEncapLocCount > 0) {
+									m_DefectData[nCurDoc].arrayDefectX.resize(nEncapLocCount + 1);
+									m_DefectData[nCurDoc].arrayDefectY.resize(nEncapLocCount + 1);
+									for (int nIndex = 1; nIndex < m_DefectData[nCurDoc].arrayDefectX.size(); nIndex++) {
+										m_DefectData[nCurDoc].arrayDefectX[nIndex].push_back(-1);
+										m_DefectData[nCurDoc].arrayDefectY[nIndex].push_back(-1);
+									}
+								}
+							}
+							
+
+							if (hIsPassForInsufficient == FALSE)
+								return -ENCAP_INSUFFICIENT;
+							else if (hIsPassForExcess == FALSE)
+								return -ENCAP_EXCESS;
+						}
+
+						HTuple hEncapLocationRow1, hEncapLocationCol1, hEncapLocationRow2, hEncapLocationCol2;
+						SmallestRectangle1(hEncapLocation, &hEncapLocationRow1, &hEncapLocationCol1, &hEncapLocationRow2, &hEncapLocationCol2);
+						CleanDefectData(nCurDoc);
+
+						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint((hEncapLocationCol1.D() + hEncapLocationCol2.D()) / 2,
+																					(hEncapLocationRow1.D() + hEncapLocationRow2.D()) / 2));
+						
+						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hEncapLocationCol1.D(), hEncapLocationRow1.D(),
+																		hEncapLocationCol2.D(), hEncapLocationRow2.D()));
+						return -ENCAP_CONTAMINATION;//Return Fake Error Code
+					}
+
+					//----- Starting to inspect Encap Surface
+
+					HImage hEncapInspectedImage;
+					_FCI_Encap_Extraction(hImage, hEncapLocation, &hEncapInspectedImage, &hDebugImageOutEncapDefect, &hDebugRegionOutEncapDefect, nStepDebug, \
+											hErosionOffset, &hDebugMsgOutEncapDefect);
+					if (nStepDebug) {
+						StepDebug(hDebugImageOutEncapDefect, hDebugRegionOutEncapDefect, colorCyan, hDebugMsgOutEncapDefect, bRegionInsp);
+					}
+
+					// -- Encap Crack
+					HTuple  hDebugMsgOutEncapCrack;
+					HImage hDebugImageOutEncapCrack;
+					HRegion hDebugRegionOutEncapCrack;
+					HRegion hCrackDefectRegion;
+					HTuple hMinContrastCrack, hMinSizeCrack, hMinLengthCrack, hMinSquareSizeCrack, hIsPass;
+					HTuple  hAllECrackDefectMinSize, hAllECrackDefectMinLength, hAllECrackDefectMinSqSize;
+
+					hMinContrastCrack = m_EncapParm.nMinContrastCrack;
+					hMinSizeCrack = m_EncapParm.nMinSizeCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinLengthCrack = m_EncapParm.nMinLengthCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinSquareSizeCrack = m_EncapParm.nMinSquareSizeCrack / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					_FCI_Inspect_Encap_Crack(hEncapInspectedImage,
+						&hCrackDefectRegion, &hDebugImageOutEncapCrack, &hDebugRegionOutEncapCrack, nStepDebug,
+						hMinContrastCrack, hMinSizeCrack, hMinLengthCrack, hMinSquareSizeCrack,
+						&hIsPass, &hDebugMsgOutEncapCrack, &hAllECrackDefectMinSize, &hAllECrackDefectMinLength, &hAllECrackDefectMinSqSize);
+
+
+					if (nStepDebug) {
+						StepDebug(hDebugImageOutEncapCrack, hDebugRegionOutEncapCrack, colorCyan, hDebugMsgOutEncapCrack, bRegionInsp);
+					}
+					if (hIsPass == FALSE){
+						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hCrackDefectRegion, &hCrackDefectRegion, &hDebugImageOutEncapCrack, &hDebugRegionOutEncapCrack,
+							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapCrack, &hIsPass);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutEncapCrack, hDebugRegionOutEncapCrack, colorCyan, hDebugMsgOutEncapCrack, bRegionInsp);
+						}
+
+						if (hIsPass == FALSE) {
+							m_arrayOverlayInspection.Add(hCrackDefectRegion, colorRed);
+							CString str;
+							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							HTuple hValue = hAllECrackDefectMinSize * hResolution;
+							double dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Crack Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllECrackDefectMinLength * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Crack Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinLength.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllECrackDefectMinSqSize * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Crack Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECrackDefectMinSqSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							//Store the defect information for Deep Learning Saving
+							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+							Connection(hCrackDefectRegion, &hCrackDefectRegion);
+							RegionFeatures(hCrackDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+								, &hDefectInfo);
+
+							CleanDefectData(nCurDoc);
+
+							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+							}
+
+
+							if (pTrainingData->bCentralizedVerificationMode) {
+								//Get region points
+								HObject hRegionBorder;
+								HTuple hDefectCount;
+								CountObj(hCrackDefectRegion, &hDefectCount);
+								int nDefectCount = hDefectCount.I();
+								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
+								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
+								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
+									HObject hCurrentDefect;
+									SelectObj(hCrackDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
+									Boundary(hCurrentDefect, &hRegionBorder, "outer");
+									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+									if (hCenterX.Length() > 0) {
+										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
+											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
+										}
+									}
+								}
+							}
+
+							return -ENCAP_CRACK;
+						}
+					}
+
+					// -- Encap Blow Hole
+					HTuple hDebugMsgOutEncapBH;
+					HImage hDebugImageOutEncapBH;
+					HRegion hDebugRegionOutEncapBH;
+					HRegion hBHDefectRegion;
+					HTuple hMinCircularityBH, hMinLengthBH, hMinSquareSizeBH, hMinGrayMeanBH, hMinContrastBH, hMinSizeBH;
+					HTuple hAllEBHDefectMinSize, hAllEBHDefectMinLength, hAllEBHDefectMinSqSize;
+
+					hMinContrastBH = m_EncapParm.nMinContrastBH;
+					hMinSizeBH = m_EncapParm.nMinSizeBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinCircularityBH = m_EncapParm.dMinCircularityBH;
+					hMinLengthBH = m_EncapParm.nMinLengthBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinSquareSizeBH = m_EncapParm.nMinSquareSizeBH / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinGrayMeanBH = m_EncapParm.nMinGrayMeanBH;
+					_FCI_Inspect_BlowHole(hEncapInspectedImage,
+						&hBHDefectRegion, &hDebugImageOutEncapBH, &hDebugRegionOutEncapBH, nStepDebug,
+						hMinContrastBH, hMinSizeBH, hMinCircularityBH, hMinLengthBH, hMinSquareSizeBH, hMinGrayMeanBH,
+						&hIsPass, &hDebugMsgOutEncapBH, &hAllEBHDefectMinSize, &hAllEBHDefectMinLength, &hAllEBHDefectMinSqSize);
+
+
+					if (nStepDebug) {
+						StepDebug(hDebugImageOutEncapBH, hDebugRegionOutEncapBH, colorCyan, hDebugMsgOutEncapBH, bRegionInsp);
+					}
+
+					if (hIsPass == FALSE){
+						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hBHDefectRegion, &hBHDefectRegion, &hDebugImageOutEncapBH, &hDebugRegionOutEncapBH,
+							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapBH, &hIsPass);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutEncapBH, hDebugRegionOutEncapBH, colorCyan, hDebugMsgOutEncapBH, bRegionInsp);
+						}
+
+						if (hIsPass == FALSE) {
+							m_arrayOverlayInspection.Add(hBHDefectRegion, colorRed);
+							CString str;
+							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							HTuple hValue = hAllEBHDefectMinSize * hResolution;
+							double dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap BlowHole Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllEBHDefectMinLength * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap BlowHole Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinLength.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllEBHDefectMinSqSize * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap BlowHole Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllEBHDefectMinSqSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							//Store the defect information for Deep Learning Saving
+							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+							Connection(hBHDefectRegion, &hBHDefectRegion);
+							RegionFeatures(hBHDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+								, &hDefectInfo);
+
+							CleanDefectData(nCurDoc);
+
+							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+							}
+
+							if (pTrainingData->bCentralizedVerificationMode) {
+								//Get region points
+								HObject hRegionBorder;
+								HTuple hDefectCount;
+								CountObj(hBHDefectRegion, &hDefectCount);
+								int nDefectCount = hDefectCount.I();
+								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
+								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
+								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
+									HObject hCurrentDefect;
+									SelectObj(hBHDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
+									Boundary(hCurrentDefect, &hRegionBorder, "outer");
+									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+									if (hCenterX.Length() > 0) {
+										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
+											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
+										}
+									}
+								}
+							}
+
+							return -ENCAP_BLOWHOLE;
+						}
+						
+					}
+
+					HTuple hDebugMsgOutEncapCTM;
+					HImage hDebugImageOutEncapCTM;
+					HRegion hDebugRegionOutEncapCTM;
+					HRegion hCTDefectRegion;
+					HTuple hMaxCircularityCT, hMinLengthCT, hMinSquareSizeCT, hMinContrastCT, hMinSizeCT;
+					HTuple hAllECTDefectMinSize, hAllECTDefectMinLength, hAllECTDefectMinSqSize;
+
+					hMinContrastCT = m_EncapParm.nMinContrastCT;
+					hMinSizeCT = m_EncapParm.nMinSizeCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMaxCircularityCT = m_EncapParm.dMaxCircularityCT;
+					hMinLengthCT = m_EncapParm.nMinLengthCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+					hMinSquareSizeCT = m_EncapParm.nMinSquareSizeCT / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+
+					_FCI_Inspect_Contamination(hEncapInspectedImage,
+						&hCTDefectRegion, &hDebugImageOutEncapCTM, &hDebugRegionOutEncapCTM, nStepDebug,
+						hMinContrastCT, hMinSizeCT, hMinLengthCT, hMinSquareSizeCT, hMaxCircularityCT,
+						&hIsPass, &hDebugMsgOutEncapCTM, &hAllECTDefectMinSize, &hAllECTDefectMinLength, &hAllECTDefectMinSqSize);
+
+					if (nStepDebug) {
+						StepDebug(hDebugImageOutEncapCTM, hDebugRegionOutEncapCTM, colorCyan, hDebugMsgOutEncapCTM, bRegionInsp);
+					}
+
+					if (hIsPass == FALSE){
+						_FCI_Encap_Border_LayOn_Recheck(hEncapInspectedImage, hEncapLocation, hCTDefectRegion, &hCTDefectRegion, &hDebugImageOutEncapCTM, &hDebugRegionOutEncapCTM,
+							nStepDebug, hErosionOffset, hMaxLayOnAllowedPercentage, &hDebugMsgOutEncapCTM, &hIsPass);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutEncapCTM, hDebugRegionOutEncapCTM, colorCyan, hDebugMsgOutEncapCTM, bRegionInsp);
+						}
+
+						if (hIsPass == FALSE) {
+							m_arrayOverlayInspection.Add(hCTDefectRegion, colorRed);
+							CString str;
+							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							HTuple hValue = hAllECTDefectMinSize * hResolution;
+							double dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Contamination Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllECTDefectMinLength * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Contamination Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinLength.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllECTDefectMinSqSize * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s EnCap Contamination Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllECTDefectMinSqSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+							Connection(hCTDefectRegion, &hCTDefectRegion);
+							RegionFeatures(hCTDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+								, &hDefectInfo);
+
+							CleanDefectData(nCurDoc);
+
+							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+							}
+
+							if (pTrainingData->bCentralizedVerificationMode) {
+								//Get region points
+								HObject hRegionBorder;
+								HTuple hDefectCount;
+								CountObj(hCTDefectRegion, &hDefectCount);
+								int nDefectCount = hDefectCount.I();
+								m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
+								m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
+								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
+									HObject hCurrentDefect;
+									SelectObj(hCTDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
+									Boundary(hCurrentDefect, &hRegionBorder, "outer");
+									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+									if (hCenterX.Length() > 0) {
+										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+											m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
+											m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
+										}
+									}
+								}
+							}
+
+							return -ENCAP_CONTAMINATION;
+						}
+					}
+				}
+
+				HTuple hDebugMsgOutEncapRP;
+				HImage hDebugImageOutEncapRP;
+				HRegion hEncapInspLocation;
+				HRegion hDebugRegionOutEncapRP;
+				HRegion hRect, hProjectedEncapRegion;
+				HTuple hRectRow, hRectCol;
+				GenEmptyObj(&hEncapInspLocation);
+				for (int i = 1; i<3; i++) {
+					TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].top, &hRectRow);
+					TupleConcat(hRectRow, m_TrainingData.m_rectEncap[i].bottom, &hRectRow);
+					TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].left, &hRectCol);
+					TupleConcat(hRectCol, m_TrainingData.m_rectEncap[i].right, &hRectCol);
+					GenRectangle1(&hRect, m_TrainingData.m_rectEncap[i].top, m_TrainingData.m_rectEncap[i].left,
+						m_TrainingData.m_rectEncap[i].bottom, m_TrainingData.m_rectEncap[i].right);
+					ConcatObj(hEncapInspLocation, hRect, &hEncapInspLocation);
+				}	
+	
+				_FCI_Encap_InnOuter_RgnProjection(hImage,hEncapInspLocation,
+					&hProjectedEncapRegion,&hDebugImageOutEncapRP,&hDebugRegionOutEncapRP,nStepDebug,
+					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow, 
+					hInspectShiftAlongCol,&hDebugMsgOutEncapRP);
+				
+				
+				m_arrayOverlayInspection.Add(hProjectedEncapRegion, colorCyan);
+
+				if (nStepDebug) {
+					StepDebug(hDebugImageOutEncapRP, hDebugRegionOutEncapRP, colorCyan, hDebugMsgOutEncapRP, bRegionInsp);
+				}
+
+				_FCI_Inspect_EncapDefects(hImage, hEncapLocation, hProjectedEncapRegion,
+										&IsPass, &hIsPassForInsufficient, &hIsPassForExcess);
+
+				
+				if (IsPass == FALSE) {
+					HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+					Connection(hEncapLocation, &hEncapLocation);
+					RegionFeatures(hEncapLocation, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+						, &hDefectInfo);
+
+					CleanDefectData(nCurDoc);
+
+					for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+							hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+					}
+
+					if (pTrainingData->bCentralizedVerificationMode) {
+						//Get region points
+						HObject hRegionBorder, hRegionUnion;
+						Union1(hEncapLocation, &hRegionUnion);
+						Boundary(hRegionUnion, &hRegionBorder, "outer");
+						GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+						if (hCenterX.Length() > 0) {
+							m_DefectData[nCurDoc].arrayDefectX.resize(1);
+							m_DefectData[nCurDoc].arrayDefectY.resize(1);
+							for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+								m_DefectData[nCurDoc].arrayDefectX[0].push_back(hCenterX[nPoint].I());
+								m_DefectData[nCurDoc].arrayDefectY[0].push_back(hCenterY[nPoint].I());
+							}
+						}
+						//Inner and outer Encap
+						Connection(hProjectedEncapRegion, &hProjectedEncapRegion);
+						RegionFeatures(hProjectedEncapRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+							, &hDefectInfo);
+						for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+							m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+							m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+								hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+						}
+
+						HTuple hDefectCount;
+						CountObj(hProjectedEncapRegion, &hDefectCount);
+						int nEncapLocCount = hDefectCount.I();
+						if (nEncapLocCount > 0) {
+							m_DefectData[nCurDoc].arrayDefectX.resize(nEncapLocCount+1);
+							m_DefectData[nCurDoc].arrayDefectY.resize(nEncapLocCount+1);
+							for (int nIndex = 1; nIndex < m_DefectData[nCurDoc].arrayDefectX.size(); nIndex++) {
+								m_DefectData[nCurDoc].arrayDefectX[nIndex].push_back(-1);
+								m_DefectData[nCurDoc].arrayDefectY[nIndex].push_back(-1);
+							}
+						}
+					}
+
+					if (hIsPassForInsufficient == FALSE)
+						return -ENCAP_INSUFFICIENT;
+					else if (hIsPassForExcess == FALSE)
+						return -ENCAP_EXCESS;
+				}
+			}
+		}
+
+		//// Cover layer (Doc - 4th intensity) ////
+		//HTuple hCoverLayerImgIndex = -1;
+		//if (m_TrainingData.hvec_TupleVectorCoverLayer.GetSize() > 0)
+		//	if (m_TrainingData.hvec_TupleVectorCoverLayer[0].Length() > 0)
+		//		hCoverLayerImgIndex = ((m_TrainingData.hvec_TupleVectorCoverLayer[/*nIndexEncap*/0][0]) /*- 1*/);
+		if (/*nCurTrack == 1 &&*/ m_CoverLayerParm.bEnable /*&& nCurDoc == hCoverLayerImgIndex*/) {
+			if(!m_TrainingData.bEnableCoverLayer)
+				return -COVER_LAYER_INSP;
+			
+			HTuple hMaxRotAngle, PatternSearchAreaX, PatternSearchAreaY, hMinAccScore, hNoOfRegion;
+			HTuple hCLDatumRow, hCLDatumCol, hCLModelID, hRefAngle, hRefPointRow, hRefPointCol;
+			HTuple hRow, hCol, hRectRow, hRectCol;
+
+			int nIndexCL = 0;
+			hNoOfRegion = m_TrainingData.nCLDatum;
+			hMaxRotAngle = m_TrainingData.nCLMaxRotationAngle;
+			PatternSearchAreaX = m_TrainingData.nCLPatternSearchX;
+			PatternSearchAreaY = m_TrainingData.nCLPatternSearchY;
+			hMinAccScore = m_TrainingData.nCLMinAcceptanceScore;
+			hCLModelID = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
+			hRefAngle = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
+			hRefPointRow = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
+			hRefPointCol = m_TrainingData.hvec_TupleVectorCoverLayer[nIndexCL++];
+
+			HTuple hDebugMsgOutEncapCLRP;
+			HImage hDebugImageOutEncapCLRP;
+			HRegion hDebugRegionOutEncapCLRP;
+			HRegion hCLRegion, hInspProjectedRegionCL, hCVLRegion, hRect;
+			GenEmptyObj(&hInspProjectedRegionCL);
+
+			for (int i = 0; i<m_TrainingData.nCLInspRegion; i++) {
+				TupleConcat(hRectRow, m_TrainingData.m_rectCoverLayer[i].top, &hRectRow);
+				TupleConcat(hRectRow, m_TrainingData.m_rectCoverLayer[i].bottom, &hRectRow);
+				TupleConcat(hRectCol, m_TrainingData.m_rectCoverLayer[i].left, &hRectCol);
+				TupleConcat(hRectCol, m_TrainingData.m_rectCoverLayer[i].right, &hRectCol);
+				GenRectangle1(&hRect, m_TrainingData.m_rectCoverLayer[i].top, m_TrainingData.m_rectCoverLayer[i].left,
+					m_TrainingData.m_rectCoverLayer[i].bottom, m_TrainingData.m_rectCoverLayer[i].right);
+				ConcatObj(hInspProjectedRegionCL, hRect, &hInspProjectedRegionCL);
+			}
+
+			HTuple hIsCVLDatumFound = 0;
+			if(m_TrainingData.bEnableCLDatum)
+			{
+				HTuple hMatchModelScore, hMatchAngle, hDatumMatchCR, hDatumMatchCC, hDebugMessageOut;
+				HRegion hModelRegion;
+
+				for (int i = 0; i<m_TrainingData.nCLDatum; i++) {
+					TupleConcat(hRow, m_TrainingData.m_rectCLDatum[i].top, &hRow);
+					TupleConcat(hRow, m_TrainingData.m_rectCLDatum[i].bottom, &hRow);
+					TupleConcat(hCol, m_TrainingData.m_rectCLDatum[i].left, &hCol);
+					TupleConcat(hCol, m_TrainingData.m_rectCLDatum[i].right, &hCol);
+				}
+
+				_FCI_Inspect_UniquePattern(hImage,
+					&hModelRegion, &hDebugImage, &hDebugRegion, nStepDebug,
+					PatternSearchAreaX, PatternSearchAreaY, hMaxRotAngle,
+					hMinAccScore, hCLModelID, hRow, hCol,
+					&hIsCVLDatumFound, &hMatchModelScore, &hMatchAngle,
+					&hDatumMatchCR, &hDatumMatchCC, &hDebugMessageOut);
+
+				if (nStepDebug) {
+					StepDebug(hDebugImage, hDebugRegion, colorCyan, hDebugMessageOut, bRegionInsp);
+				}
+
+				if (hIsCVLDatumFound == TRUE)
+				{
+					_FCI_ConnectedRgn_RegionProjection(hImage,
+						&hCVLRegion, &hInspProjectedRegionCL,&hDebugImageOutEncapCLRP,&hDebugRegionOutEncapCLRP,nStepDebug,
+						hNoOfRegion, hRectRow, hRectCol, hRefAngle,hRefPointRow,hRefPointCol, hMatchAngle, hDatumMatchCR,
+						hDatumMatchCC,&hDebugMsgOutEncapCLRP);
+				}
+			}
+
+			//If can not found the datum or CVL datum is disabled --> following the shifted was found by Device Locatio Step
+			if (hIsCVLDatumFound == FALSE) {
+				_FCI_Encap_RegionProjection(hImage, hInspProjectedRegionCL,
+					&hInspProjectedRegionCL, &hDebugImageOutEncapCLRP, &hDebugRegionOutEncapCLRP, 0,
+					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+					hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutEncapCLRP);
+			}
+
+			HRegion hMissingCVLRegion;
+			GenEmptyObj(&hMissingCVLRegion);
+
+			HTuple hCoverLayerPresent;
+			GenEmptyObj(&hCLRegion);
+			for (int i = 0; i < m_TrainingData.nCLInspRegion; i++) {
+				HRegion hSelectedRegion, hCLDefectRegion;
+				SelectObj(hInspProjectedRegionCL, &hSelectedRegion, i+1);
+
+				HTuple hDebugMsgOutEncapCLDefect;
+				HImage hDebugImageOutEncapCLDefect;
+				HRegion hDebugRegionOutEncapCLDefect;
+				HTuple hContrast = m_CoverLayerParm.nContrast[i];
+				HTuple hMinLength = m_CoverLayerParm.nCoverLayerLength[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				HTuple hMinHeight = m_CoverLayerParm.nCoverLayerHeight[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				HTuple hMaxGap = m_CoverLayerParm.dMaskSize[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				HTuple hGapWidthTolerance = m_CoverLayerParm.dGapWidthTolerance[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				HTuple hGapHeightTolerance = m_CoverLayerParm.dGapHeightTolerance[i] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				HTuple hIsCoverLayer;
+
+				_FCI_Inspect_CoverLayer(hImage, hSelectedRegion,
+					&hCLDefectRegion,&hDebugImageOutEncapCLDefect,&hDebugRegionOutEncapCLDefect,nStepDebug,
+					hContrast, hMaxGap, hGapWidthTolerance, hGapHeightTolerance, hMinLength, hMinHeight, nCurFOV, nTotalFOV,
+					&hCoverLayerPresent,&hDebugMsgOutEncapCLDefect);
+
+				if (nStepDebug) {
+					StepDebug(hDebugImageOutEncapCLDefect, hDebugRegionOutEncapCLDefect, colorCyan, hDebugMsgOutEncapCLDefect, bRegionInsp);
+				}
+
+				if (hCoverLayerPresent == TRUE)
+					ConcatObj(hCLRegion, hCLDefectRegion, &hCLRegion);
+				else
+					ConcatObj(hMissingCVLRegion, hSelectedRegion, &hMissingCVLRegion);
+			}
+
+			HTuple hNumOfCL;
+			CountObj(hCLRegion, &hNumOfCL);
+
+			m_arrayOverlayInspection.Add(hCLRegion, colorCyan);
+			if (hNumOfCL < m_TrainingData.nCLInspRegion){
+				//Store the defect information for Deep Learning Saving
+				HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+				Connection(hMissingCVLRegion, &hMissingCVLRegion);
+				RegionFeatures(hMissingCVLRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+					, &hDefectInfo);
+
+				CleanDefectData(nCurDoc);
+
+				for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+					m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+					m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+						hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+				
+					if (pTrainingData->bCentralizedVerificationMode) {
+						//Create Fake Point --> Rectangle Information is enough --> No need get the region points
+						m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
+						m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
+					}
+				}
+
+				return -COVER_LAYER_INSP;
+			}
+
+			if (m_CoverLayerAlignmentParm.bEnablePointer)
+			{
+				HTuple  hNoOfPointers;
+				HTuple hPointerRows = HTuple();
+				HTuple hPointerCols = HTuple();
+
+				hNoOfPointers = m_TrainingData.hvec_TupleVectorCoverLayerPointer.GetAt(1);
+
+				HTuple hDebugMsgOutPointerRP;
+				HImage hDebugImageOutPointerRP;
+				HRegion hDebugRegionOutPointerRP;
+				HRegion hPointerRegion, hRectPointer, hProjectedPointerRegion;
+				HTuple hRectRow, hRectCol;
+					
+				if (m_TrainingData.bEnableManualPointer == TRUE)
+				{
+					GenEmptyObj(&pTrainingData->hObjectPointerLocation);
+					for (int nPointer = 0; nPointer < hNoOfPointers; nPointer++)
+					{
+						GenEmptyObj(&hRectPointer);
+						GenEmptyObj(&hPointerRegion);
+						TupleConcat(hPointerRows, m_TrainingData.m_rectPointer[nPointer].top, &hPointerRows);
+						TupleConcat(hPointerRows, m_TrainingData.m_rectPointer[nPointer].bottom, &hPointerRows);
+						TupleConcat(hPointerCols, m_TrainingData.m_rectPointer[nPointer].left, &hPointerCols);
+						TupleConcat(hPointerCols, m_TrainingData.m_rectPointer[nPointer].right, &hPointerCols);
+						GenRectangle1(&hRectPointer, m_TrainingData.m_rectPointer[nPointer].top, m_TrainingData.m_rectPointer[nPointer].left,
+							m_TrainingData.m_rectPointer[nPointer].bottom, m_TrainingData.m_rectPointer[nPointer].right);
+						_FCI_CVLA_ManualPointer_RgnProjection(hImage, hRectPointer,
+							&hPointerRegion, &hDebugImageOutPointerRP, &hDebugRegionOutPointerRP, nStepDebug,
+							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle, hInspectShiftAlongRow, hInspectShiftAlongCol, hNoOfPointers,
+							&hDebugMsgOutPointerRP);
+						m_arrayOverlayInspection.Add(hPointerRegion, colorBlue);
+						ConcatObj(pTrainingData->hObjectPointerLocation, hPointerRegion, &pTrainingData->hObjectPointerLocation);
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutPointerRP, hDebugRegionOutPointerRP, colorCyan, hDebugMsgOutPointerRP, bRegionInsp);
+						}
+					}
+				}
+				for (int nPointer = 0; nPointer < hNoOfPointers; nPointer++)
+				{
+					HTuple hNoOfPointers, hMaxRotationAngle, hPatternSearchAreaAlongX, hPatternSearchAreaAlongY, hMinAcceptanceScore, hEnableManualPointer;
+					HTuple hIsPass, hPercentageOut;
+					HRegion hDebugRegionOut, hPointerRegion;
+					HRegion hSelectedPointer, hSelectedCoverLayerSkeleton, hSelectedCoverLayerInsufficient;
+					hNoOfPointers = m_TrainingData.hvec_TupleVectorCoverLayerPointer.GetAt(1);
+					HTuple hTolerance = (m_CoverLayerAlignmentParm.dToleranceDist[nPointer] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2)) * 2;
+					HTuple hIsHorizontal = m_CoverLayerAlignmentParm.nCoverLayerDirection[nPointer];
+					int nIndexCLAP = 0;
+					if (m_TrainingData.bEnableManualPointer == TRUE)
+					{
+						_FCI_Inspect_CoverLayerAlignmentUsingManualPointer(hImage, pTrainingData->hObjectPointerLocation, hCLRegion,
+							&hSelectedPointer, &hSelectedCoverLayerSkeleton,
+							 hTolerance, hIsHorizontal, nPointer + 1,
+							&hIsPass, &hPercentageOut);
+					}
+					else
+					{
+						_FCI_Inspect_CoverLayerAlignmentUsingPointer(hImage, pTrainingData->hObjectPointerLocation, hCLRegion,
+							&hSelectedPointer, &hSelectedCoverLayerSkeleton,
+							hTolerance, hIsHorizontal, nPointer + 1,
+							&hIsPass, &hPercentageOut);			
+					}
+					if (hIsPass == 0) {
+						m_arrayOverlayInspection.Add(hSelectedCoverLayerInsufficient, colorRed);
+						return -COVER_LAYER_ALIGNMENT;
+					}
+					else
+					{
+						m_arrayOverlayInspection.Add(hSelectedPointer, colorYellow);
+						m_arrayOverlayInspection.Add(hSelectedCoverLayerSkeleton, colorYellow);
+					}
+				}
+			}
+		}
+		if (m_SlotParm.bEnable) {
+			CleanDefectData(nCurDoc);
+
+			int nIsPassAll[5] = { 1,1,1,1,1 };
+			HTuple hDebugMsgOutSlot;
+			HImage hDebugImageOutSlot;
+			HRegion hDebugRegionOutSlot, hConcatSlotMaskRgnProjected;
+			HTuple hMessage;
+			HRegion hConcatSlotMaskRgn;
+			HTuple hSlotPolygonPoints, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2;
+			GenEmptyObj(&hConcatSlotMaskRgnProjected);
+			GenEmptyObj(&hConcatSlotMaskRgn);
+			for (int nMask = 0; nMask < m_TrainingData.nSlotMaskNumber; nMask++) {
+				HRegion hSlotMask;
+				hSlotPolygonPoints = HTuple();
+				if (m_TrainingData.nSlotMaskType[nMask] == RECTANGLE) {
+					hSlotRow1 = m_TrainingData.m_rectMaskSlot[nMask].top;
+					hSlotCol1 = m_TrainingData.m_rectMaskSlot[nMask].left;
+					hSlotRow2 = m_TrainingData.m_rectMaskSlot[nMask].bottom;
+					hSlotCol2 = m_TrainingData.m_rectMaskSlot[nMask].right;
+					GenRectangle1(&hSlotMask, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2);
+				}
+				else if (m_TrainingData.nSlotMaskType[nMask] == ECLIPSE) {
+					GenEllipse(&hSlotMask, m_TrainingData.m_rectMaskSlot[nMask].CenterPoint().y, m_TrainingData.m_rectMaskSlot[nMask].CenterPoint().x, 0,
+						m_TrainingData.m_rectMaskSlot[nMask].Width() / 2, m_TrainingData.m_rectMaskSlot[nMask].Height() / 2);
+				}
+				else if (m_TrainingData.nSlotMaskType[nMask] == POLYGON) {
+					HTuple hPoint;
+					HTuple hRows, hCols;
+					for (int nPointId = 0; nPointId < m_TrainingData.nSlotMaskPolygonPointCount[nMask]; nPointId++) {
+						TupleConcat(hRows, m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].y, &hRows);
+						TupleConcat(hCols, m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].x, &hCols);
+
+						hPoint.Clear();
+						hPoint.Append(m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].y);
+						hPoint.Append(m_TrainingData.m_SlotMaskPolygonPoint[nMask][nPointId].x);
+
+						//TupleConcat(hSlotPolygonPoints, hPoint, &hSlotPolygonPoints);
+					}
+					GenRegionPolygonFilled(&hSlotMask, hRows, hCols);
+				}
+				Union2(hConcatSlotMaskRgn, hSlotMask, &hConcatSlotMaskRgn);
+				HTuple hArea, hDummy;
+				AreaCenter(hConcatSlotMaskRgn, &hArea, &hDummy, &hDummy);
+				if(hArea > 0)
+					_FCI_Encap_RegionProjection(hImage, hConcatSlotMaskRgn,
+						&hConcatSlotMaskRgnProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
+						hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+						hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
+			}
+			m_arrayOverlayInspection.Add(hConcatSlotMaskRgnProjected, colorYellow);
+
+			for (int k = 0; k < m_TrainingData.nNumOfSlot; k++) {
+				HTuple hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2, hMinIntensity, hContrastEdgeSlot, hIsPass;
+				HRegion hSlotTeachRegion, hSlotTeachProjected, hSlotLocation;
+				if (m_TrainingData.nSlotAreaType == RECTANGLE) {
+					hSlotRow1 = m_TrainingData.m_rectSlot[k].top;
+					hSlotCol1 = m_TrainingData.m_rectSlot[k].left;
+					hSlotRow2 = m_TrainingData.m_rectSlot[k].bottom;
+					hSlotCol2 = m_TrainingData.m_rectSlot[k].right;
+					GenRectangle1(&hSlotTeachRegion, hSlotRow1, hSlotCol1, hSlotRow2, hSlotCol2);
+				}
+				else {
+					HTuple hRows, hCols;
+					for (int nPointId = 0; nPointId < m_TrainingData.nSlotPolygonPointCount; nPointId++) {
+						TupleConcat(hRows, m_TrainingData.m_SlotPolygonPoint[k][nPointId].y, &hRows);
+						TupleConcat(hCols, m_TrainingData.m_SlotPolygonPoint[k][nPointId].x, &hCols);
+					}
+					GenRegionPolygonFilled(&hSlotTeachRegion, hRows, hCols);
+				}
+				
+				_FCI_Encap_RegionProjection(hImage, hSlotTeachRegion,
+					&hSlotTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
+					hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+					hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
+
+				//m_arrayOverlayInspection.Add(hSlotTeachProjected, colorYellow);
+
+				hMinIntensity = m_TrainingData.nMinIntensitySlot;
+				hContrastEdgeSlot = m_TrainingData.nContrastEdgeSlot;
+				_FCI_Inspect_SlotLocation(hImage, hSlotTeachProjected, 
+					&hSlotLocation, &hDebugImageOutSlot, &hDebugRegionOutSlot,
+					nStepDebug, hMinIntensity, hContrastEdgeSlot,
+					&hIsPass, &hDebugMsgOutSlot);
+				if (nStepDebug) {
+					StepDebug(hDebugImageOutSlot, hDebugRegionOutSlot, colorCyan, hDebugMsgOutSlot, bRegionInsp);
+				}
+				if (hIsPass == 1) {
+					m_arrayOverlayInspection.Add(hSlotLocation, colorOrange);
+					if (m_SlotParm.bEnableCheckSurface[k]) {
+						HTuple hDummy, hColumnSlotLocation, hRowSlotLocation;
+						AreaCenter(hSlotLocation, &hDummy, &hRowSlotLocation, &hColumnSlotLocation);
+						HTuple hSlotLimitRow1, hSlotLimitCol1, hSlotLimitRow2, hSlotLimitCol2;
+						HRegion hSlotLimitTeachRegion, hSlotLimitTeachProjected;
+
+						if (m_TrainingData.nSlotLimitAreaType == RECTANGLE) {
+							hSlotLimitRow1 = m_TrainingData.m_rectSlotLimit[k].top;
+							hSlotLimitCol1 = m_TrainingData.m_rectSlotLimit[k].left;
+							hSlotLimitRow2 = m_TrainingData.m_rectSlotLimit[k].bottom;
+							hSlotLimitCol2 = m_TrainingData.m_rectSlotLimit[k].right;
+							GenRectangle1(&hSlotLimitTeachRegion, hSlotLimitRow1, hSlotLimitCol1, hSlotLimitRow2, hSlotLimitCol2);
+						}
+						//POLYGON Type
+						else {
+							HTuple hRows, hCols;
+							for (int nPointId = 0; nPointId < m_TrainingData.nSlotLimitPolygonPointCount; nPointId++) {
+								TupleConcat(hRows, m_TrainingData.m_SlotLimitPolygonPoint[k][nPointId].y, &hRows);
+								TupleConcat(hCols, m_TrainingData.m_SlotLimitPolygonPoint[k][nPointId].x, &hCols);
+							}
+							GenRegionPolygonFilled(&hSlotLimitTeachRegion, hRows, hCols);
+						}
+
+						HTuple hColumnSlotLimitLocation, hShiftColumnSlotLimit, hRowSlotLimitLocation, hShiftRowSlotLimit;
+						AreaCenter(hSlotLimitTeachRegion, &hDummy, &hRowSlotLimitLocation, &hColumnSlotLimitLocation);
+						hShiftRowSlotLimit = hRowSlotLimitLocation - hRowSlotLocation;
+						hShiftColumnSlotLimit = hColumnSlotLimitLocation - hColumnSlotLocation;
+
+						/*HTuple hSlotSize, hSlotWidth, hSlotHeight;
+						RegionFeatures(hSlotLimitTeachRegion, (HTuple("width").Append("height")), &hSlotSize);
+						hSlotWidth = hSlotSize[0];
+						hSlotHeight = hSlotSize[1];
+						if (hSlotHeight > hSlotWidth) {
+							_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
+								&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
+								hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+								hInspectShiftAlongRow, hShiftColumnSlotLimit, &hDebugMsgOutSlot);
+						}
+						else {
+							_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
+								&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
+								hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+								hShiftRowSlotLimit, hInspectShiftAlongCol, &hDebugMsgOutSlot);
+						}*/
+
+						_FCI_Encap_RegionProjection(hImage, hSlotLimitTeachRegion,
+							&hSlotLimitTeachProjected, &hDebugImageOutSlot, &hDebugRegionOutSlot, 0,
+							hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+							hInspectShiftAlongRow, hInspectShiftAlongCol, &hDebugMsgOutSlot);
+
+						//m_arrayOverlayInspection.Add(hSlotLimitTeachProjected, colorCyan);
+
+						HTuple hEdgeOffset, hMinGVDiff, hMinContrast, hMinSizeDefect, hMinLengthDefect, hMinSquareSizeDefect, hMinCount;
+						HRegion hSlotDefect;
+						HTuple hAllDefectMinSize, hAllDefectMinLength, hAllDefectMinSqSize;
+						hEdgeOffset = m_SlotParm.nEdgeOffset[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+						hMinGVDiff = m_SlotParm.nMinMeanGVDiffSlot[k];
+						hMinContrast = m_SlotParm.nMinContrast[k];
+						hMinSizeDefect = m_SlotParm.nMinSize[k] / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
+						hMinLengthDefect = m_SlotParm.nMinLength[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+						hMinSquareSizeDefect = m_SlotParm.nMinSquareSize[k] / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+						hMinCount = m_SlotParm.nMinCount[k];
+						HRegion hSlotLocationMasking;
+						Difference(hSlotLocation, hConcatSlotMaskRgnProjected, &hSlotLocationMasking);
+
+						_FCI_Inspect_SlotDefect(hImage, hSlotLocation, hSlotLimitTeachProjected, hSlotLocationMasking, &hSlotDefect, &hDebugImageOutSlot, &hDebugRegionOutSlot,
+							nStepDebug, hEdgeOffset, hMinGVDiff, hMinContrast, hMinSizeDefect, hMinLengthDefect, hMinSquareSizeDefect, hMinCount,
+							&hIsPass, &hDebugMsgOutSlot, &hAllDefectMinSize, &hAllDefectMinLength, &hAllDefectMinSqSize);
+						if (nStepDebug) {
+							StepDebug(hDebugImageOutSlot, hDebugRegionOutSlot, colorCyan, hDebugMsgOutSlot, bRegionInsp);
+						}
+						if (hIsPass == FALSE) {
+							m_arrayOverlayInspection.Add(hSlotDefect, colorRed);
+							CString str;
+							HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							HTuple hValue = hAllDefectMinSize * (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
+							double dValue = hValue.D();
+							str.Format("Fov[%d] %s Slot Defect Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllDefectMinLength * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s Slot Defect Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinLength.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							hValue = hAllDefectMinSqSize * hResolution;
+							dValue = hValue.D();
+							str.Format("Fov[%d] %s Slot Defect Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, hAllDefectMinSqSize.D(), dValue);
+							strArrayInspValues.Add(str);
+
+							HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+							Connection(hSlotDefect, &hSlotDefect);
+							RegionFeatures(hSlotDefect, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+								, &hDefectInfo);
+
+							for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+								m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+								m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+									hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+							}
+							if (pTrainingData->bCentralizedVerificationMode) {
+								//Get region points
+								HObject hRegionBorder;
+								HTuple hDefectCount;
+								CountObj(hSlotDefect, &hDefectCount);
+								int nDefectCount = hDefectCount.I();
+								for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
+									HObject hCurrentDefect;
+									SelectObj(hSlotDefect, &hCurrentDefect, HTuple(nDefectIdx + 1));
+									Boundary(hCurrentDefect, &hRegionBorder, "outer");
+									GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+									if (hCenterX.Length() > 0) {
+										std::vector<int> arrayX;
+										std::vector<int> arrayY;
+										for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+											arrayX.push_back(hCenterX[nPoint].I());
+											arrayY.push_back(hCenterY[nPoint].I());
+										}
+										m_DefectData[nCurDoc].arrayDefectX.push_back(arrayX);
+										m_DefectData[nCurDoc].arrayDefectY.push_back(arrayY);
+									}
+									else {
+										m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
+										m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
+									}
+								}
+							}
+
+
+							nIsPassAll[k] = 0;
+						}
+					}
+				}
+				else {
+					m_arrayOverlayInspection.Add(hSlotTeachProjected, colorRed);
+
+					HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+					Connection(hSlotTeachProjected, &hSlotTeachProjected);
+					RegionFeatures(hSlotTeachProjected, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+						, &hDefectInfo);
+
+					for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length() / 6; nDefectIdx++) {
+						m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6 * nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+						m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx + 3].D(),
+							hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+					
+						if (pTrainingData->bCentralizedVerificationMode) {
+							//Create Fake Point --> Rectangle Information is enough --> No need get the region points
+							m_DefectData[nCurDoc].arrayDefectX.push_back(std::vector<int>(1, 0));
+							m_DefectData[nCurDoc].arrayDefectY.push_back(std::vector<int>(1, 0));
+						}
+					}
+
+					nIsPassAll[k] = 0;
+					continue;
+				}
+			}
+
+			for (int k = 0; k < 5; k++) {
+				if (nIsPassAll[k] == 0) {
+					return -SLOT;
+				}
+			}
+		}
+		//// Device Edge Insp ////
+		if (m_DieEdgeParm.bEnable)
+		{
+			HTuple hDeviceLocationEnable = m_TrainingData.hvec_TupleVectorLocation.GetAt(0);
+			if (hDeviceLocationEnable == 1)
+			{
+				HImage hImageForPVI_Inspection, hImageRotate, hImageRotateShift;
+				HImage hDebugImageOutPviRegion;
+				HRegion hDebugRegionOutPviRegion;
+				HRegion hRegionForPVI_Inspection, hRegionAffineTrans, hRegionAffineRotateShift;
+				HTuple hDebugMsgOutPviRegion;
+			
+				HTuple hLocationSelectedRow, hLocationSelectedCol, hLocationSelectedPhi, hLocationSelectedLen1, hLocationSelectedLen2;
+				SmallestRectangle2(hDeviceLocationSelected, &hLocationSelectedRow, &hLocationSelectedCol, &hLocationSelectedPhi, &hLocationSelectedLen1, &hLocationSelectedLen2);
+
+				Projection_Function(hImage, hDeviceLocationSelected, &hRegionAffineRotateShift, &hImageRotateShift,
+					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
+					hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol, hInspectShiftAlongRow,
+					hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion);
+
+				
+				HImage hImageAbsDiff, hImageSub;
+				AbsDiffImage(hTeachImage, hImageRotateShift, &hImageAbsDiff, 1);
+				HRegion hFitMaskRegion, hPviTeachRegion;
+				GenEmptyRegion(&hFitMaskRegion);
+				GenEmptyRegion(&hPviTeachRegion);
+
+				Projection_Back_Function(hImage,hRegionForPVI_Inspection, hImageAbsDiff, hFitMaskRegion, hPviTeachRegion, &hRegionForPVI_Inspection, &hImageSub,
+					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
+					-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
+					0, &hDebugMsgOutPviRegion);
+
+				//// Rotate Teach Region
+				HTuple hSobelAmp, hDeviceLocationEnable, hNoOfLocationRegions, hDeviceLocWidth, hDeviceLocHeight, hDeviceMaskSize;
+				HTuple hMinDeviceContrast, hLocationTeachRows, hLocationTeachCols, hDummy, hReferencePointType;
+
+				int nIndex = 0;
+				hDeviceLocationEnable = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hNoOfLocationRegions = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDeviceLocWidth = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDeviceLocHeight = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDeviceMaskSize = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hMinDeviceContrast = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hSobelAmp = m_TrainingData.bSobelAmp;
+				hReferencePointType = m_TrainingData.nDeviceReferencePointType;
+
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hLocationTeachRows = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hLocationTeachCols = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				//For Device Edge Detection option
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+				hDummy = m_TrainingData.hvec_TupleVectorLocation.GetAt(nIndex++);
+
+				HRegion hTeachLocationRegion;
+				_FCI_Inspect_EdgeLocation(hTeachImage,
+					&hTeachLocationRegion, hSobelAmp, hNoOfLocationRegions, hDeviceLocWidth, hDeviceLocHeight, hMinDeviceContrast,
+					hLocationTeachRows, hLocationTeachCols, hDeviceMaskSize, nCurFOV, nTotalFOV, nCurTrack + 1, hReferencePointType, 
+					&hDummy, &hDummy, &hDummy);
+
+				HTuple hTeachLocationRow, hTeachLocationCol, hTeachLocationPhi, hTeachLocationLen1, hTeachLocationLen2;
+				SmallestRectangle2(hTeachLocationRegion, &hTeachLocationRow, &hTeachLocationCol, &hTeachLocationPhi, &hTeachLocationLen1, &hTeachLocationLen2);
+
+				Projection_Function(hImage, hTeachLocationRegion, &hRegionAffineRotateShift, &hImageRotateShift,
+					&hDebugImageOutPviRegion, &hDebugRegionOutPviRegion, nStepDebug,
+					-hInspectRotationAngle, hTeachLocationRow, hTeachLocationCol, -hInspectShiftAlongRow,
+					-hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion);
+
+				////
+
+				//// Set Offset & width
+				HTuple hOffset = m_DieEdgeParm.dOffset > 0 ? m_DieEdgeParm.dOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_DieEdgeParm.dOffset;
+				HTuple hWidth = m_DieEdgeParm.dWidth > 0 ? m_DieEdgeParm.dWidth / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_DieEdgeParm.dWidth;
+				HRegion hDieEdgeInspRegion = hDeviceLocationSelected;
+				HImage hImageSubEdge;
+
+
+				HImage hDebugImageForPVI_Inspection;
+				HRegion hDebugRegionForPVI_Inspection;
+				HTuple hDebugMessageOut;
+
+				_FCI_OffsetRegions(hRegionAffineRotateShift, hImageSub,
+					&hDieEdgeInspRegion, &hImageSubEdge,
+					&hDebugImageForPVI_Inspection, &hDebugRegionForPVI_Inspection,
+					nStepDebug, hOffset, hWidth,0,TRUE,
+					&hDebugMessageOut);
+
+				if (nStepDebug) 
+					StepDebug(hDebugImageForPVI_Inspection, hDebugRegionForPVI_Inspection, colorCyan, hDebugMessageOut, bRegionInsp);
+
+				if (hOffset > 0) {
+					m_arrayOverlayInspection.Add(hDieEdgeInspRegion, colorCyan);
+					if (hWidth > 0) {
+						HRegion hFillUp, hHole;
+						FillUp(hDieEdgeInspRegion, &hFillUp);
+						Difference(hFillUp, hRegionForPVI_Inspection, &hHole);
+						m_arrayOverlayInspection.Add(hHole, colorCyan);
+					}
+				}
+
+				HRegion hHoleRegion;
+				if (hWidth > 0)
+				{
+					HRegion hFillUp;
+					FillUp(hDieEdgeInspRegion, &hFillUp);
+					Difference(hFillUp, hDieEdgeInspRegion, &hHoleRegion);
+					m_arrayOverlayInspection.Add(hHoleRegion, colorCyan);
+				}
+
+				if (nStepDebug) {
+					HTuple hMsg = "Device Edge Insp Region";
+					StepDebug(hImage, hDieEdgeInspRegion, colorCyan, hMsg, bRegionInsp);
+					HTuple hNumHole = 0;
+					if (hWidth > 0)
+					{
+						HRegion hFillUp;
+						FillUp(hDieEdgeInspRegion, &hFillUp);
+						Difference(hFillUp, hDieEdgeInspRegion, &hHoleRegion);
+						StepDebug(hImageSubEdge, hHoleRegion, colorCyan, hMsg, bRegionInsp);
+					}
+				}
+
+				HTuple hDefectCharecterstics, hContrast, hMinSize, hMinLength, hMinSquareSize, hMinCount;
+
+				hDefectCharecterstics = m_DieEdgeParm.nDefectCharacteristics;
+				hContrast = m_DieEdgeParm.nContrast;
+				hMinSize = m_DieEdgeParm.m_nSize / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
+				hMinLength = m_DieEdgeParm.nMinLength / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				hMinSquareSize = m_DieEdgeParm.nMinSquareSize / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+				hMinCount = m_DieEdgeParm.nMinCount;
+
+				HTuple hPass;
+				HRegion hEdgeDefectRegion;
+
+				_FCI_PVI_Inspection(hImageSubEdge, hDieEdgeInspRegion, hImage,
+					&hEdgeDefectRegion,
+					&hDebugImage, &hDebugRegion,
+					hDefectCharecterstics, hContrast,
+					hMinLength, hMinSize, hMinSquareSize, hMinCount,
+					nStepDebug, nCurDoc,0,0,TRUE,
+					&hPass, &hDebugMsg);
+
+				if (nStepDebug) {
+					StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
+				}
+
+				if (hPass == FALSE) {
+					m_arrayOverlayInspection.Add(hEdgeDefectRegion, colorRed);
+					return -DIE_EDGE;
+				}
+
+				
+			}
+		}
+
+
+		//// Region Insp ////
+
+		HTuple hPVIArea, hPVIAngle, hPVI2DCenter, hPVISize = 0; 
+		if(m_TrainingData.hvec_TupleVectorPVI[0].GetSize() > 0)
+			hPVIArea = m_TrainingData.hvec_TupleVectorPVI[0][0];
+
+		if(hPVIArea != 0 && hPVIArea.Length() > 0) {
+			BOOL bPVIEnable = FALSE;
+			for (int i = 0; i < hPVIArea; i++) {
+				if (m_pPviInspectionSetup[i].bEnable)
+					bPVIEnable = TRUE;
+			}
+			if (bPVIEnable)
+			{ 
+
+				m_arrayOverlayPVIInsp.RemoveAll();
+
+				HImage hImageForPVI_Inspection, hImageRotate, hImageRotateShift;
+				HRegion hRegionForPVI_Inspection, hRegionAffineTrans, hRegionAffineRotateShift;
+				HTuple hDebugMsgOutPviRegion;
+				HImage hDebugImageOutPviRegion;
+				HRegion hDebugRegionOutPviRegion;
+				HTuple hMaskNumber;
+				HTuple hMask2DCenterPoints, hMaskAngleConcat, hMaskSize, hPolygonPoints;
+				HTuple hSlotNumber;
+				HTuple hSlot2DCenterPoints, hSlotAngleConcat, hSlotSize;
+				HTuple hTeachModelRowCentre, hTeachModelColCentre;
+				HTuple hMatchModelCentreRow, hMatchModelCentreCol;
+
+				HTuple hLocationSelectedRow, hLocationSelectedCol, hLocationSelectedPhi, hLocationSelectedLen1, hLocationSelectedLen2;
+				SmallestRectangle2(hDeviceLocationSelected, &hLocationSelectedRow, &hLocationSelectedCol, &hLocationSelectedPhi, &hLocationSelectedLen1, &hLocationSelectedLen2);
+				HTuple hDebugMsgOutPviRegion_T;
+				HImage hDebugImageOutPviRegion_T;
+				HRegion hDebugRegionOutPviRegion_T;
+
+				Projection_Function(hImage, hDeviceLocationSelected, &hRegionAffineRotateShift, &hImageRotateShift,
+					&hDebugImageOutPviRegion_T, &hDebugRegionOutPviRegion_T, nStepDebug,
+					hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol, hInspectShiftAlongRow, 
+					hInspectShiftAlongCol, 0, 0, &hDebugMsgOutPviRegion_T);
+
+				HImage hImageAbsDiff;
+				AbsDiffImage(hTeachImage, hImageRotateShift, &hImageAbsDiff, 1);
+
+				for (int nArea = 0; nArea < hPVIArea; nArea++) {
+
+					if (!m_pPviInspectionSetup[nArea].bEnable && !m_pPviInspectionSetup[nArea].bEdgeEnable)
+						continue;
+
+					int nIndex = 1;
+					hPVIAngle = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hPVI2DCenter = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hPVISize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+
+					hMaskNumber = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hMask2DCenterPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hMaskAngleConcat = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hMaskSize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+
+					hSlotNumber = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hSlot2DCenterPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hSlotAngleConcat = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+					hSlotSize = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+
+					hPolygonPoints = m_TrainingData.hvec_TupleVectorPVI[nIndex++][nArea];
+
+					HRegion hConcatMask, hRectMask;
+					HRegion hPviTeachRegion;
+					GenEmptyObj(&hPviTeachRegion);
+
+					if (m_pPviInspectionSetup[nArea].nDeviceAreaType == RECTANGLE)
+						GenRectangle2(&hRegionForPVI_Inspection, hPVI2DCenter[0], hPVI2DCenter[1], hPVIAngle, hPVISize[0], hPVISize[1]);
+					else if (m_pPviInspectionSetup[nArea].nDeviceAreaType == ECLIPSE)
+						GenEllipse(&hRegionForPVI_Inspection, hPVI2DCenter[0], hPVI2DCenter[1], 0,
+							m_pPviInspectionSetup[nArea].m_rectPviArea.Width() / 2, m_pPviInspectionSetup[nArea].m_rectPviArea.Height() / 2);
+					else if (m_pPviInspectionSetup[nArea].nDeviceAreaType == POLYGON) {
+						HTuple hRows, hCols;
+						for (int nPointId = 0; nPointId < m_pPviInspectionSetup[nArea].nPolygonPointNumber; nPointId++) {
+							TupleConcat(hRows, hPolygonPoints[2 * nPointId], &hRows);
+							TupleConcat(hCols, hPolygonPoints[2 * (nPointId + 1) - 1], &hCols);
+						}
+						GenRegionPolygonFilled(&hRegionForPVI_Inspection, hRows, hCols);
+					}
+
+					
+					ConcatObj(hPviTeachRegion, hRegionForPVI_Inspection, &hPviTeachRegion);
+					GenEmptyObj(&hConcatMask);
+
+					for (int nMaskIndex = 0; nMaskIndex < hMaskNumber; nMaskIndex++)
+					{
+						GenRectangle2(&hRectMask, hMask2DCenterPoints[2 * nMaskIndex], hMask2DCenterPoints[2 * (nMaskIndex + 1) - 1],
+							hMaskAngleConcat[nMaskIndex], hMaskSize[2 * nMaskIndex], hMaskSize[2 * (nMaskIndex + 1) - 1]);
+						ConcatObj(hConcatMask, hRectMask, &hConcatMask);
+					}
+
+					
+
+					//	m_arrayOverlayInspection.Add(hConcatMask, colorYellow);//TEsting 
+					HRegion hFitMaskRegion;
+					GenEmptyObj(&hFitMaskRegion);
+					if (hMaskNumber > 0)
+					{
+						Union1(hConcatMask, &hFitMaskRegion);
+						Difference(hRegionForPVI_Inspection, hFitMaskRegion, &hRegionForPVI_Inspection);
+					}
+					
+					HImage hImageRotateShiftBack, hImageSub;
+					HRegion hRegionAffineRotateShiftBack;
+
+					HTuple hDebugMsgOutPviRegionArea;
+					HImage hDebugImageOutPviRegionArea;
+					HRegion hDebugRegionOutPviRegionArea;
+
+					/*Projection_Back_Function(hRegionForPVI_Inspection, hImageAbsDiff, &hRegionForPVI_Inspection, &hImageSub,
+						&hDebugImageOutPviRegionArea, &hDebugRegionOutPviRegionArea, nStepDebug,
+						-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
+						nArea, &hDebugMsgOutPviRegionArea);*/
+
+					Projection_Back_Function(hImage,hRegionForPVI_Inspection, hImageAbsDiff, hFitMaskRegion, hPviTeachRegion, &hRegionForPVI_Inspection, &hImageSub,
+						&hDebugImageOutPviRegionArea, &hDebugRegionOutPviRegionArea, nStepDebug,
+						-hInspectShiftAlongRow, -hInspectShiftAlongCol, 0, 0, -hInspectRotationAngle, hLocationSelectedRow, hLocationSelectedCol,
+						nArea, &hDebugMsgOutPviRegionArea);
+					HTuple hNumHole = 0;
+					HRegion hMaskRegion;
+					HRegion hSlotRegion;
+					RegionFeatures(hRegionForPVI_Inspection, "holes_num", &hNumHole);
+					if (hNumHole > 0)
+					{
+						HRegion hFillUp;
+						FillUp(hRegionForPVI_Inspection, &hFillUp);
+						Difference(hFillUp, hRegionForPVI_Inspection, &hMaskRegion);
+						m_arrayOverlayInspection.Add(hMaskRegion, colorYellow);
+						Difference(hFillUp, hRegionForPVI_Inspection, &hSlotRegion);
+						m_arrayOverlayInspection.Add(hSlotRegion, colorYellow);
+					}
+					m_arrayOverlayInspection.Add(hRegionForPVI_Inspection, colorOrange);
+
+					if (nStepDebug) {
+						StepDebug(hDebugImageOutPviRegionArea, hDebugRegionOutPviRegionArea, colorCyan, hDebugMsgOutPviRegionArea, bRegionInsp);
+					}
+					else {
+						if (m_pPviInspectionSetup[nArea].bEnable || m_pPviInspectionSetup[nArea].bEdgeEnable) {
+							HRegion hPVIDefectRegionDummy;
+							PVIDefectsOverlay(hImageSub, hPVIDefectRegionDummy, "", colorRed);
+						}
+					}
+
+					//// PVI Insp ////
+					if (m_pPviInspectionSetup[nArea].bEnable) {
+						ReduceDomain(hImageSub, hRegionForPVI_Inspection, &hImageForPVI_Inspection);
+					}
+
+					if (m_pPviInspectionSetup[nArea].bEdgeEnable)  {
+						//// Edge insp ///
+						HTuple hEdgeWidth = m_pPviInspectionSetup[nArea].dEdgeWidth > 0 ? m_pPviInspectionSetup[nArea].dEdgeWidth / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_pPviInspectionSetup[nArea].dEdgeWidth;
+						HTuple hEdgeOffset = m_pPviInspectionSetup[nArea].dEdgeOffset > 0 ? m_pPviInspectionSetup[nArea].dEdgeOffset / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2) : m_pPviInspectionSetup[nArea].dEdgeOffset;
+
+						HTuple hMinEdgeContrast, hMaxEdgeContrast, hEdgeRgnOpen;
+						HTuple hIsEdgePVIPass, hDebugMessageOut;
+
+						HImage hDebugImageOut;
+						HRegion hDebugRegionOut;
+
+						hMinEdgeContrast = m_pPviInspectionSetup[nArea].nMinEdgeContrast;
+						hMaxEdgeContrast = m_pPviInspectionSetup[nArea].nMaxEdgeContrast;
+						hEdgeRgnOpen = m_pPviInspectionSetup[nArea].dEdgeRegionOpen / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+						if (hEdgeRgnOpen < 1)
+							hEdgeRgnOpen = 1;
+
+						_FCI_ExtractExactEdge(hImage, hRegionForPVI_Inspection,
+							&hRegionForPVI_Inspection, &hDebugImageOut, &hDebugRegionOut, 
+							nStepDebug, hMinEdgeContrast, hMaxEdgeContrast, hEdgeRgnOpen,
+							nArea,&hIsEdgePVIPass, &hDebugMessageOut);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageOut, hDebugRegionOut, colorCyan, hDebugMessageOut, bRegionInsp);
+						}
+
+						HImage hDebugImageForPVI_Inspection;
+						HRegion hDebugRegionForPVI_Inspection;
+
+						_FCI_OffsetRegions(hRegionForPVI_Inspection, hImageSub,
+							&hRegionForPVI_Inspection, &hImageForPVI_Inspection,
+							&hDebugImageForPVI_Inspection, &hDebugRegionForPVI_Inspection,
+							nStepDebug, hEdgeOffset, hEdgeWidth, 
+							nArea,FALSE,&hDebugMessageOut);
+
+						if (nStepDebug) {
+							StepDebug(hDebugImageForPVI_Inspection, hDebugRegionForPVI_Inspection, colorCyan, hDebugMessageOut, bRegionInsp);
+						}
+
+						if (hEdgeOffset > 0) {
+							m_arrayOverlayInspection.Add(hRegionForPVI_Inspection, colorCyan);
+							if (hEdgeWidth > 0) {
+								HRegion hFillUp, hHole;
+								FillUp(hRegionForPVI_Inspection, &hFillUp);
+								Difference(hFillUp, hRegionForPVI_Inspection, &hHole);
+								m_arrayOverlayInspection.Add(hHole, colorCyan);
+							}
+						}
+					}
+
+					BOOL bPVIPassAll = TRUE;
+					for (int nDefCount = 0; nDefCount < m_pPviInspectionSetup[nArea].nDefectCount; nDefCount++) {
+						if (m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].bEnable) {
+							HTuple hDefectCharecterstics, hContrast, hMinSize, hMinLength, hMinSquareSize, hMinCount;
+
+							hDefectCharecterstics = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nDefectCharacteristics;
+							hContrast = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nContrast;
+							hMinSize = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nSize / (pCalibData->dResolutionAlongXInMicronPerPixel*pCalibData->dResolutionAlongYInMicronPerPixel);
+							hMinLength = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinLength / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							hMinSquareSize = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinSquareSize / ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+							hMinCount = m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].nMinCount;
+
+							HTuple hPass;
+							HRegion hPVIDefectRegion, hActualPVIDefectRegion;
+
+							_FCI_PVI_Inspection(hImageForPVI_Inspection, hRegionForPVI_Inspection, hImage,
+								&hPVIDefectRegion,
+								&hDebugImage, &hDebugRegion,
+								hDefectCharecterstics, hContrast,
+								hMinLength, hMinSize, hMinSquareSize, hMinCount,
+								nStepDebug, nCurDoc,
+								nDefCount+1,nArea,FALSE,&hPass, &hDebugMsg);
+							if (nStepDebug) {
+								StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
+							}
+							
+							if (hPass == FALSE)
+							{
+								//m_arrayOverlayInspection.Add(hPVIDefectRegion, colorRed);
+								//return -m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nID;
+								HTuple hAllPVIDefectMinSize, hAllPVIDefectMinLength, hAllPVIDefectMinSqSize;
+
+								HTuple hMinMeanGVDiff = m_pPviInspectionSetup[nArea].nMinGVDiff;
+								HTuple hIntensityRecheck = m_pPviInspectionSetup[nArea].nIntensity;
+								BOOL bRecheckEn = m_pPviInspectionSetup[nArea].bPVIRecheckEnable;
+
+								PVI_Inspection_ReCheck(hImage, hTeachImage, hPVIDefectRegion, hRegionForPVI_Inspection,
+									&hActualPVIDefectRegion, &hDebugImage, &hDebugRegion,
+									nStepDebug, hLocationSelectedRow, hLocationSelectedCol, hInspectRotationAngle,
+									hInspectShiftAlongRow, hInspectShiftAlongCol, hDefectCharecterstics, nDefCount + 1, nArea,
+									hMinMeanGVDiff, hIntensityRecheck, bRecheckEn, FALSE,
+									&hPass, &hAllPVIDefectMinSize, &hAllPVIDefectMinLength, &hAllPVIDefectMinSqSize, &hDebugMsg);
+								
+								if (nStepDebug) {
+									StepDebug(hDebugImage, hDebugRegion, colorRed, hDebugMsg, bRegionInsp);
+								}
+
+								//PVI Slot Connection Re-check
+								if (m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckEnable && hPass == FALSE) {
+									HTuple hConnectionCheckTopSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckTopDie;
+									HTuple hConnectionCheckBottomSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckBottomDie;
+									HTuple hConnectionCheckLeftSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckLeftDie;
+									HTuple hConnectionCheckRightSide = m_pPviInspectionSetup[nArea].bPVISlotConnectionCheckRightDie;
+
+									HRegion hConcatSlot, hRectSlot;
+									GenEmptyObj(&hConcatSlot);
+									for (int nSlotIndex = 0; nSlotIndex < m_pPviInspectionSetup[nArea].nNumOfSlot; nSlotIndex++)
+									{
+										GenRectangle2(&hRectSlot, hSlot2DCenterPoints[2 * nSlotIndex], hSlot2DCenterPoints[2 * (nSlotIndex + 1) - 1],
+											hSlotAngleConcat[nSlotIndex], hSlotSize[2 * nSlotIndex], hSlotSize[2 * (nSlotIndex + 1) - 1]);
+										ConcatObj(hConcatSlot, hRectSlot, &hConcatSlot);
+									}
+									_FCI_PVI_CheckingSlot(hRegionForPVI_Inspection, hActualPVIDefectRegion, hConcatSlot, hImage, &hActualPVIDefectRegion,
+										&hDebugImage, &hDebugRegion, nStepDebug, hDeviceCenterRow, hDeviceCenterCol, hInspectRotationAngle,
+										hInspectShiftAlongRow, hInspectShiftAlongCol, hConnectionCheckTopSide, hConnectionCheckBottomSide, hConnectionCheckLeftSide,
+										hConnectionCheckRightSide, &hPass, &hDebugMsg);
+
+									if (m_pPviInspectionSetup[nArea].nNumOfSlot) {
+										//***Project On Inspect Image: Method 1
+										HTuple  hv_HomMat2DIdentity, hv_HomMat2DRotate, hv_HomMat2DTranslate;
+										HomMat2dIdentity(&hv_HomMat2DIdentity);
+										HomMat2dRotate(hv_HomMat2DIdentity, -hInspectRotationAngle, hDeviceCenterRow, hDeviceCenterCol,
+											&hv_HomMat2DRotate);
+										HomMat2dTranslate(hv_HomMat2DRotate, -hInspectShiftAlongRow, -hInspectShiftAlongCol, &hv_HomMat2DTranslate);
+										AffineTransRegion(hConcatSlot, &hConcatSlot, hv_HomMat2DTranslate,
+											"nearest_neighbor");
+										m_arrayOverlayInspection.Add(hConcatSlot, colorYellow);
+									}
+									
+								}
+
+								HTuple hCount = 0;
+								Connection(hActualPVIDefectRegion, &hActualPVIDefectRegion);
+								CountObj(hActualPVIDefectRegion, &hCount);
+								if (0 != (hCount >= hMinCount)) {
+									m_arrayOverlayInspection.Add(hActualPVIDefectRegion, colorRed);
+									CString str;
+									HTuple hResolution = ((pCalibData->dResolutionAlongXInMicronPerPixel + pCalibData->dResolutionAlongYInMicronPerPixel) / 2);
+									HTuple hValue = hAllPVIDefectMinSize*hResolution;
+									double dValue = hValue.D();
+									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinSize.D(), dValue);
+									strArrayInspValues.Add(str);
+
+									hValue = hAllPVIDefectMinLength*hResolution;
+									dValue = hValue.D();
+									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Length %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinLength.D(), dValue);
+									strArrayInspValues.Add(str);
+
+									hValue = hAllPVIDefectMinSqSize*hResolution;
+									dValue = hValue.D();
+									str.Format("Fov[%d] %s Area[%d] Pvi Defect[%s] Min Square Size %.4f pixel [%.4f um]", nCurFOV, strOutPutLog, nArea, m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].strDefectName, hAllPVIDefectMinSqSize.D(), dValue);
+									strArrayInspValues.Add(str);
+
+									//Store the defect information for Deep Learning Saving
+									HTuple hCenterX, hCenterY, hTop, hLeft, hBottom, hRight, hDefectInfo;
+									Connection(hActualPVIDefectRegion, &hActualPVIDefectRegion);
+									RegionFeatures(hActualPVIDefectRegion, (((HTuple("column").Append("row")).Append("column1")).Append("row1").Append("column2").Append("row2"))
+										,&hDefectInfo);
+
+									CleanDefectData(nCurDoc);
+
+									for (int nDefectIdx = 0; nDefectIdx < hDefectInfo.Length()/6; nDefectIdx++) {
+										m_DefectData[nCurDoc].arrayDefectCenters.push_back(CPoint(hDefectInfo[6*nDefectIdx].D(), hDefectInfo[6 * nDefectIdx + 1].D()));
+										m_DefectData[nCurDoc].arrayDefectRects.push_back(CRect(hDefectInfo[6 * nDefectIdx + 2].D(), hDefectInfo[6 * nDefectIdx +3].D(),
+																		hDefectInfo[6 * nDefectIdx + 4].D(), hDefectInfo[6 * nDefectIdx + 5].D()));
+									}
+
+									if (pTrainingData->bCentralizedVerificationMode) {
+										//Get region points
+										HObject hRegionBorder;
+										HTuple hDefectCount;
+										CountObj(hActualPVIDefectRegion, &hDefectCount);
+										int nDefectCount = hDefectCount.I();
+										m_DefectData[nCurDoc].arrayDefectX.resize(nDefectCount);
+										m_DefectData[nCurDoc].arrayDefectY.resize(nDefectCount);
+										for (int nDefectIdx = 0; nDefectIdx < nDefectCount; nDefectIdx++) {
+											HObject hCurrentDefect;
+											SelectObj(hActualPVIDefectRegion, &hCurrentDefect, HTuple(nDefectIdx + 1));
+											Boundary(hCurrentDefect, &hRegionBorder, "outer");
+											GetRegionContour(hRegionBorder, &hCenterY, &hCenterX);
+
+											if (hCenterX.Length() > 0) {
+												for (int nPoint = 0; nPoint < hCenterX.Length(); nPoint++) {
+													m_DefectData[nCurDoc].arrayDefectX[nDefectIdx].push_back(hCenterX[nPoint].I());
+													m_DefectData[nCurDoc].arrayDefectY[nDefectIdx].push_back(hCenterY[nPoint].I());
+												}
+											}
+										}
+									}
+
+									return -m_pPviInspectionSetup[nArea].m_pPviDefect[nDefCount].m_nErrorCodeID;//Check with Nguyen lol
+								}
+							}
+						}
+					}
+					//if (/*hPass == FALSE*/bPVIPassAll == FALSE) {
+					//	//m_arrayOverlayInspection.Add(hPVIDefectRegion, colorRed);
+					//	return -PVI_INSP;
+				}	//}
+			}
 		}
 	}
 

@@ -1,0 +1,216 @@
+[Good Unit]
+Error Code=0
+Color=65280
+
+[Device Location]
+Error Code=1
+Color=0
+
+[Datum Location]
+Error Code=1
+Color=128
+
+[Tilt Inspection]
+Error Code=2
+Color=8388736
+
+[Cover Layer Inspection]
+Error Code=3
+Color=65535
+
+[Cover Layer Alignment]
+Error Code=3
+Color=65535
+
+[Encap Insufficient]
+Error Code=4
+Color=8388608
+
+[Encap Excess]
+Error Code=4
+Color=8388608
+
+[Encap Blow Hole]
+Error Code=5
+Color=16711935
+
+[Encap Contamination]
+Error Code=5
+Color=16711935
+
+[Die Edge]
+Error Code=13
+Color=255
+
+[Result Unknown]
+Error Code=14
+Color=16711680
+
+[Pos1_Top1_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos1_Top1_Area1_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos1_Top1_Area2_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos1_Top1_Area2_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos1_Top2_Area1_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos1_Top2_Area1_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos1_Top2_Area2_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos1_Top2_Area2_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos1_Top3_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos1_Bottom1_Area1_Dno1_FM]
+Error Code=12
+Color=16776960
+
+[Pos1_Bottom1_Area1_Dno2_Scratch]
+Error Code=12
+Color=16776960
+
+[Pos1_Bottom2_Area1_Dno1_FM]
+Error Code=10
+Color=16776960
+
+[Pos2_Top1_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos2_Top1_Area1_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos2_Top1_Area2_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos2_Top1_Area2_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos2_Top2_Area1_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos2_Top2_Area1_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos2_Top2_Area2_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos2_Top2_Area2_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos2_Bottom1_Area1_Dno1_FM]
+Error Code=12
+Color=16776960
+
+[Pos2_Bottom1_Area1_Dno2_Scratch]
+Error Code=12
+Color=16776960
+
+[Pos3_Top1_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos3_Top1_Area1_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos3_Top1_Area2_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos3_Top1_Area2_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos3_Top2_Area1_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos3_Top2_Area1_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos3_Top2_Area2_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos3_Top2_Area2_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos3_Bottom1_Area1_Dno1_FM]
+Error Code=12
+Color=16776960
+
+[Pos3_Bottom1_Area1_Dno2_Scratch]
+Error Code=12
+Color=16776960
+
+[Pos4_Top1_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos4_Top1_Area1_Dno2_Scratch]
+Error Code=10
+Color=255
+
+[Pos4_Top1_Area2_Dno1_Scratch]
+Error Code=10
+Color=255
+
+[Pos4_Top1_Area2_Dno2_FM]
+Error Code=10
+Color=255
+
+[Pos4_Top2_Area1_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos4_Top2_Area1_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos4_Top2_Area2_Dno1_FM]
+Error Code=11
+Color=8421504
+
+[Pos4_Top2_Area2_Dno2_Scratch]
+Error Code=11
+Color=8421504
+
+[Pos4_Top3_Area1_Dno1_FM]
+Error Code=10
+Color=255
+
+[Pos4_Bottom1_Area1_Dno1_FM]
+Error Code=10
+Color=16776960
+

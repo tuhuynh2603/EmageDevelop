@@ -1,5 +1,5 @@
 [Device Location]
-Enable=0
+Enable=1
 Width=7.000000e+03
 Height=1.000000e+04
 Device Gap Mask=3.600000e+02
@@ -73,7 +73,7 @@ Tracing Mask Type 10=0
 Polygon Points at Mask 10=3
 
 [CoverLayer]
-Enable=0
+Enable=1
 No. of Cover Layer =2
 Enable Datum Search=0
 No. of Datum=2
@@ -83,13 +83,13 @@ Search Area in Y=280
 Min. Acceptance Score=65
 
 [CoverLayer Alignment :: Pointer]
-Enable=0
+Enable=1
 No. of Pointer =2
 Max. Rotation Angle=10
 Search Area in X=165
 Search Area in Y=165
 Min. Acceptance Score=65
-Enable Manual Pointer=0
+Enable Manual Pointer=1
 
 [Slot]
 Enable=0
@@ -142,19 +142,6 @@ Polygon Points at Mask 9=3
 Slot Mask Type 10=0
 Polygon Points at Mask 10=3
 
-[Encap Magnus]
-Enable=0
-Min Thresh=40
-Max Thresh=220
-Crop Expand Width=220
-Crop Expand Height=220
-Dilate Kernel Width=7
-Dilate Kernel Height=7
-Opening Kernel Width=1
-Opening Kernel Height=1
-Crop Smooth=151
-Area Object=999999
-
 [Training Data]
 TeachDeviceLoc RectTop=107
 TeachDeviceLoc RectBot=1952
@@ -184,10 +171,6 @@ TeachDattam/PatternSearch Rect4Top=0
 TeachDattam/PatternSearch Rect4Bot=0
 TeachDattam/PatternSearch Rect4Lft=0
 TeachDattam/PatternSearch Rect4Rht=0
-TeachAutoFocusingSequence RectTop=774
-TeachAutoFocusingSequence RectBot=1274
-TeachAutoFocusingSequence RectLft=774
-TeachAutoFocusingSequence RectRht=1274
 TeachPVIEncap  Rect1Top=0
 TeachPVIEncap  Rect1Bot=0
 TeachPVIEncap  Rect1Lft=0

@@ -1,0 +1,54 @@
+[PVI Area]
+Count=1
+
+[PVIArea_1]
+Enable=0
+Device Edge Width=0.000000e+00
+Device Edge Offset=0.000000e+00
+Device Mask Number=0
+Device Mask Type=0
+Recheck Enable=1
+Min. Mean GV Diff=10
+Max Contrast=40
+Slot Connection Check=0
+Number of Slot=0
+Top Die Connection Check=0
+Bottom Die Connection Check=0
+Left Die Connection Check=0
+Right Die Connection Check=0
+TeachPviArea RectPos1Top=552
+TeachPviArea RectPos1Bot=1731
+TeachPviArea RectPos1Lft=655
+TeachPviArea RectPos1Rht=956
+TeachPviArea Polygon Point Count1=3
+TeachPviArea PolygonPos1Point1X=700
+TeachPviArea PolygonPos1Point1Y=700
+TeachPviArea PolygonPos1Point2X=750
+TeachPviArea PolygonPos1Point2Y=700
+TeachPviArea PolygonPos1Point3X=800
+TeachPviArea PolygonPos1Point3Y=700
+Defect Count=1
+
+[PVIArea_1_Edge]
+Enable=0
+Min Contrast=38
+Max Contrast=220
+Edge Region Open=5.500000e+00
+Edge Width=0.000000e+00
+Edge Offset=5.500000e+01
+
+[PVIArea_1_DefectsIndex]
+1=42211
+
+[PVIArea_1_Defects]
+42211=FM
+
+[PVIArea_1_FM]
+Enable=0
+DefectCharacteristics=0
+Size=100
+Contrast=80
+MinLength=30
+MinSquareSize=50
+MinCount=1
+

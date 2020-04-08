@@ -37,7 +37,6 @@ enum {
 	ENCAP_CONTAMINATION,
 	SLOT,
 	DIE_EDGE,
-	ENCAP_MAGNUS,
 	PVI_INSP,
 	USER_MODIFIED, //Is False Acceptance
 	USER_MODIFIED_FALSE_REJECTION,
@@ -277,24 +276,6 @@ public:
 	double dWidth;
 };
 
-class DECLSPEC_LS3_IF CEncapMagnus : public CParameterCore
-{
-public:
-	CEncapMagnus();
-
-
-	int Thresh[2];
-	int Crop_Expand[2];
-	int Dilate_Kernel[2];
-	int Opening_Kernel[2];
-	int Crop_Smooth;
-	int Area_Object;
-	BOOL bEnable;
-
-
-
-};
-
 
 class DECLSPEC_LS3_IF CTeachInspectData
 {
@@ -496,46 +477,6 @@ public:
 
 	//For Centralized PC
 	BOOL bCentralizedVerificationMode;
-
-
-
-	//////////Encap Magnus Teach parameter 
-
-	BOOL bEnable_EncapManus;
-	int nThreshMin_EncapManus;
-	int nThreshMax_EncapManus;
-
-	CRect hRect_DeviceLocationEncap_magnus;
-	CRect hRect_EncapLocation_magnus;
-	CRect hRect_CropSmoothEncap_magnus;
-	CRect hRect_CropNoSmoothEncap_magnus;
-	CRect hRect_CropRemoveBlackLine_magnus;
-
-	int nCrop_ExpandLeft_magnus[2];
-	int nCrop_ExpandRight_magnus[2];
-	int nCrop_ExpandHeight_magnus[2];
-	int nCrop_Smooth_EncapManus[2];
-	int nCrop_RemoveBLLeft_magnus[2];
-	int nCrop_RemoveBLRight_magnus[2];
-	int nCrop_RemoveBLHeight_magnus[2];
-
-	int nDilateX_EncapManus;
-	int nDilateY_EncapManus;
-
-	int nOpeningX_EncapManus;
-	int nOpeningY_EncapManus;
-	int nValue_OpeningCircle_magnus;
-	int nValue_OpeningCircleCrop_magnus;
-	int nValue_Smooth_EncapMagnus;
-	int nArea_Object_EncapManus;
-	int nHeight_Object_magnus;
-	int nWidth_Object_magnus;
-
-	int nThreshMin_Black_EncapManus;
-	int nThreshMax_Black_EncapManus;
-	int nThreshMin_White_EncapManus;
-	int nThreshMax_White_EncapManus;
-	///////////////
 };
 
 
@@ -693,7 +634,6 @@ public:
 	CSlot m_SlotParm;
 	CTiltInsp m_TiltInspParm;
 	CDieEdge m_DieEdgeParm;
-	CEncapMagnus m_EncapMagnusPam;
 
 	SHARED_PARM *m_pShare;
 	BOOL m_bParallelism;

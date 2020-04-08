@@ -1,5 +1,5 @@
 [Cover Layer]
-Enable=0
+Enable=1
 
 [Cover Layer :: Cover Layer 1]
 Max. Intensity=60
@@ -42,7 +42,7 @@ Gap Width Tolerance=2.500000e+01
 Gap Height Tolerance=2.500000e+01
 
 [Cover Layer Alignment]
-Enable=0
+Enable=1
 
 [Cover Layer Alignment :: Pointer 1]
 Cover Layer Direction=0
@@ -163,17 +163,4 @@ Min SquareSize=110
 Min Count=1
 Insp Offset=0.000000e+00
 Insp Width=0.000000e+00
-
-[Encap Magnus]
-Enable=0
-Min Thresh=40
-Max Thresh=220
-Crop Expand Width=220
-Crop Expand Height=220
-Dilate Kernel Width=7
-Dilate Kernel Height=7
-Opening Kernel Width=1
-Opening Kernel Height=1
-Crop Smooth=151
-Area Object=999999
 

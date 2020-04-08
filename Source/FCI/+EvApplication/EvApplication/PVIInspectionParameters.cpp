@@ -20,10 +20,6 @@ CPVIInspectionParameters::CPVIInspectionParameters(CWnd* pParent /*=NULL*/)
 	: CDialog(CPVIInspectionParameters::IDD, pParent)
 {
 	m_pApp = (CApplication*)AfxGetApp();
-
-
-
-
 	m_strPVIDefect = _T("");
 	m_nIndex = 0;
 	//  m_strNoOfPviArea = _T("");

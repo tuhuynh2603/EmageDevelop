@@ -340,7 +340,7 @@ int CInspectionHandler::Inspect(CSharedData* pData,
 void CInspectionHandler::CreateParameterList(int nTrack, int nDoc, int nFOV)
 {
 	//CleanUp();
-	m_Parameters.SetSize(7);
+	m_Parameters.SetSize(6);
 	int nParamIndex = 0;
 	CParameters* pParm;
 
@@ -502,33 +502,6 @@ void CInspectionHandler::CreateParameterList(int nTrack, int nDoc, int nFOV)
 	
 	//m_Parameters.Add(pParm);
 	m_Parameters.SetAt(nParamIndex++, pParm);
-
-	/// Test bottom encap properties
-
-	pParm = new CParameters();
-	pParm->strInspection = "Encap Magnus";
-	pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.bEnable, "Enable", TBOOL, "", 0, 1, "", "Enable Encap MagnusPam"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Thresh[0], "Min Thresh", TINT, "", 0, 255, "", "Thresh"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Thresh[1], "Max Thresh", TINT, "", 0, 255, "", "Thresh"));
-
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Crop_Expand[0], "Crop Expand Width", TINT, "", 0, 500, "", "Crop Expand"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Crop_Expand[1], "Crop Expand Height", TINT, "", 0, 500, "", "Crop Expand"));
-
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Dilate_Kernel, "Dilate Kernel Width", TINT, "", 1, 20, "", "Dilate_Kernel"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Dilate_Kernel, "Dilate Kernel Height", TINT, "", 1, 20, "", "Dilate_Kernel"));
-
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Opening_Kernel, "Opening Kernel Width", TINT, "", 1, 20, "", "Opening_Kernel"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Opening_Kernel, "Opening Kernel Height", TINT, "", 1, 20, "", "Opening_Kernel"));
-
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Crop_Smooth, "Crop Smooth", TINT, "", 10, 100, "", "Crop_Smooth"));
-	//pParm->Add(new CParmInfo(&m_Inspection.m_EncapMagnusPam.Area_Object, "Area Object", TINT, "", 0,9999999, "", "Area_Object"));
-	
-
-	m_Parameters.SetAt(nParamIndex++, pParm);
-	//pParm->Add(new CParmInfo(&m_Inspection.m_MagnusParm.bEnable, "Enable", TBOOL, "", 0, 1, "", "Enable Die Edge Inspection"));
-
-	/// end test
-
 }
 
 void CInspectionHandler::CreateTeachParmList(/*int nTrack, int nDoc, int nFOV*/)
@@ -537,7 +510,7 @@ void CInspectionHandler::CreateTeachParmList(/*int nTrack, int nDoc, int nFOV*/)
 	/*CArray<CParameters*> m_ParametersTeachTemp;
 	m_ParametersTeachTemp.Copy(m_ParametersTeach);*/
 
-	m_ParametersTeach.SetSize(7);
+	m_ParametersTeach.SetSize(6);
 	int nParamIndex = 0;
 
 	CParameters* pParm;
@@ -666,47 +639,6 @@ void CInspectionHandler::CreateTeachParmList(/*int nTrack, int nDoc, int nFOV*/)
 	}
 	//m_ParametersTeach.Add(pParm);
 	m_ParametersTeach.SetAt(nParamIndex++, pParm);
-
-
-	/////////////Test Encap Bottom Magnus
-
-	pParm = new CParameters();
-	pParm->strInspection = "Teach Encap Magnus";
-	pParm->Add(new CParmInfo(&pData->bEnable_EncapManus, "Enable", TBOOL, "", 0, 1, "", "Enable Encap MagnusPam"));
-	pParm->Add(new CParmInfo(&pData->nThreshMin_EncapManus, "Min Thresh", TINT, "", 0, 255, "", "Thresh"));
-	pParm->Add(new CParmInfo(&pData->nThreshMax_EncapManus, "Max Thresh", TINT, "", 0, 255, "", "Thresh"));
-//	pParm->Add(new CParmInfo(&pData->nArea_Object_EncapManus, "Area Object", TINT, "", 0, 99999999, "", "Area_Object"));
-	pParm->Add(new CParmInfo(&pData->nHeight_Object_magnus, "Area Height ", TINT, "", 300, 10000, "", "Area_Height"));
-	pParm->Add(new CParmInfo(&pData->nWidth_Object_magnus, "Area Width", TINT, "",300, 10000, "", "Area_Width"));
-
-//	pParm->Add(new CParmInfo(&pData->nCropW_Expand_EncapManus, "Crop Expand Width", TINT, "", 0, 500, "", "Crop Expand"));
-//	pParm->Add(new CParmInfo(&pData->nCropH_Expand_EncapManus, "Crop Expand Height", TINT, "", 0, 500, "", "Crop Expand"));
-
-//	pParm->Add(new CParmInfo(&pData->nDilateX_EncapManus, "Dilate Kernel Width", TINT, "", 1, 50, "", "Dilate_Kernel"));
-	pParm->Add(new CParmInfo(&pData->nDilateY_EncapManus, "Dilate Kernel Height", TINT, "", 1, 50, "", "Dilate_Kernel"));
-
-	pParm->Add(new CParmInfo(&pData->nOpeningX_EncapManus, "Opening Kernel Width", TINT, "", 1, 300, "", "Opening_Kernel"));
-//	pParm->Add(new CParmInfo(&pData->nOpeningY_EncapManus, "Opening Kernel Height", TINT, "", 1, 100, "", "Opening_Kernel"));
-	pParm->Add(new CParmInfo(&pData->nValue_OpeningCircle_magnus, "Value Opening Encap", TINT, "", 1, 200, "", "Opening_Circle_Kernel"));
-	pParm->Add(new CParmInfo(&pData->nValue_OpeningCircleCrop_magnus, "Value Opening Crop", TINT, "", 1, 200, "", "Opening_Circle_Kernel"));
-
-	
-//	pParm->Add(new CParmInfo(&pData->nCrop_Smooth_EncapManus, "Crop Height Smooth", TINT, "", 5, 200, "", "Crop_Height"));
-	pParm->Add(new CParmInfo(&pData->nValue_Smooth_EncapMagnus, "Value Smooth", TINT, "", 1, 500, "", "Smooth_Value"));
-
-
-//	pParm->Add(new CParmInfo(&pData->nThreshMin_Black_EncapManus, "Thresh Black Min", TINT, "", 0, 255, "", "Thresh_Black"));
-	pParm->Add(new CParmInfo(&pData->nThreshMax_Black_EncapManus, "Thresh Black Region", TINT, "", 0, 255, "", "Thresh_Black"));
-	pParm->Add(new CParmInfo(&pData->nThreshMin_White_EncapManus, "Thresh White Region", TINT, "", 0, 255, "", "Thresh_White"));
-//	pParm->Add(new CParmInfo(&pData->nThreshMax_White_EncapManus, "Thesh White Max", TINT, "", 0, 255, "", "Thresh_White"));
-
-	
-	m_ParametersTeach.SetAt(nParamIndex++, pParm);
-
-
-	/////////////// end 
-
-
 
 	//
 	//if (!m_ParametersTeachTemp.IsEmpty()) {
@@ -966,42 +898,6 @@ int CInspectionHandler::GetTeachParameters(CIniFile *ptrIniFile)
 		pData->m_rectMaskEncapSurface[k] = ptrIniFile->GetCRect(strSec, strVariable, pData->m_rectMaskEncapSurface[k]);
 	}
 
-	// Encap bottom Rectangle Magnus
-	//strVariable.Format("Teach Rectangle DeviceLocation Encap Magnus Rect", 1);
-	//pData->hRect_DeviceLocationEncap_magnus = ptrIniFile->GetCRect(strSec, strVariable, pData->hRect_DeviceLocationEncap_magnus);
-//	strVariable.Format("Teach Rectangle EncapLocation Encap Magnus Rect", 1);
-//	pData->hRect_EncapLocation_magnus = ptrIniFile->GetCRect(strSec, strVariable, pData->hRect_EncapLocation_magnus);
-//	strVariable.Format("Teach Rectangle CropSmoothEncap Encap Magnus Rect", 2);
-//	pData->hRect_CropSmoothEncap_magnus = ptrIniFile->GetCRect(strSec, strVariable, pData->hRect_CropSmoothEncap_magnus);
-//	strVariable.Format("Teach Rectangle CropNoSmoothEncap Encap Magnus Rect", 3);
-//	pData->hRect_CropNoSmoothEncap_magnus = ptrIniFile->GetCRect(strSec, strVariable, pData->hRect_CropNoSmoothEncap_magnus);
-	strVariable.Format("Teach Area device location Magnus Int");
-	pData->nArea_Object_EncapManus = ptrIniFile->GetInteger(strSec, strVariable, pData->nArea_Object_EncapManus);
-	for (int k = 0; k <= 1; k++)
-
-	{
-		strVariable.Format("Teach Crop Expand Height Encap Magnus %d Int", k);
-		pData->nCrop_ExpandHeight_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_ExpandHeight_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Left Encap Magnus %d Int", k);
-		pData->nCrop_ExpandLeft_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_ExpandLeft_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Right Encap Magnus %d Int", k);
-		pData->nCrop_ExpandRight_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_ExpandRight_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Smooth Encap Magnus %d Int", k);
-		pData->nCrop_Smooth_EncapManus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_Smooth_EncapManus[k]);
-	
-		strVariable.Format("Teach Crop Remove Blackline Height Encap Magnus %d Int", k);
-		pData->nCrop_RemoveBLHeight_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_RemoveBLHeight_magnus[k]);
-
-		strVariable.Format("Teach Crop Remove Blackline Right Encap Magnus %d Int", k);
-		pData->nCrop_RemoveBLRight_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_RemoveBLRight_magnus[k]);
-
-		strVariable.Format("Teach Crop Remove Blackline Left Encap Magnus %d Int", k);
-		pData->nCrop_RemoveBLLeft_magnus[k] = ptrIniFile->GetInteger(strSec, strVariable, pData->nCrop_RemoveBLLeft_magnus[k]);
-
-	}
 // cover layer //
 	int nDatum = m_Inspection.m_TrainingData.nCLDatum;
 	for (int n = 0; n < nDatum; n++) {
@@ -1225,7 +1121,6 @@ int CInspectionHandler::SetTeachParameters(CIniFile *ptrIniFile)
 
 	}
 
-
 	for (int k = 0; k < 10; k++) {
 		strVariable.Format("TeachPVIEncap  Tracing Mask Rect%d", k + 1);
 		ptrIniFile->SetCRect(strSec, strVariable, pData->m_rectMaskEncapTracing[k]);
@@ -1241,45 +1136,6 @@ int CInspectionHandler::SetTeachParameters(CIniFile *ptrIniFile)
 
 		strVariable.Format("TeachPVIEncap  Surface Inspection Mask Rect%d", k + 1);
 		ptrIniFile->SetCRect(strSec, strVariable, pData->m_rectMaskEncapSurface[k]);
-	}
-
-// Encap bottom Rectangle Magnus
-	//strVariable.Format("Teach Rectangle DeviceLocation Encap Magnus Rect", 1);
-	//ptrIniFile->SetCRect(strSec, strVariable, pData->hRect_DeviceLocationEncap_magnus);
-//	strVariable.Format("Teach Rectangle EncapLocation Encap Magnus Rect");
-//	ptrIniFile->SetCRect(strSec, strVariable, pData->hRect_EncapLocation_magnus);
-//	strVariable.Format("Teach Rectangle CropSmoothEncap Encap Magnus Rect");
-//	ptrIniFile->SetCRect(strSec, strVariable, pData->hRect_CropSmoothEncap_magnus);
-//	strVariable.Format("Teach Rectangle CropNoSmoothEncap Encap Magnus Rect");
-//	ptrIniFile->SetCRect(strSec, strVariable, pData->hRect_CropNoSmoothEncap_magnus);
-
-	strVariable.Format("Teach Area device location Magnus Int");
-	ptrIniFile->SetInteger(strSec, strVariable, pData->nArea_Object_EncapManus);
-	for (int k = 0; k <= 1; k++)
-
-	{
-		strVariable.Format("Teach Crop Expand Height Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_ExpandHeight_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Left Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_ExpandLeft_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Right Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_ExpandRight_magnus[k]);
-
-		strVariable.Format("Teach Crop Expand Smooth Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_Smooth_EncapManus[k]);
-
-		strVariable.Format("Teach Crop Remove Blackline Height Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_RemoveBLHeight_magnus[k]);
-
-		strVariable.Format("Teach Crop Remove Blackline Right Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_RemoveBLRight_magnus[k]);
-
-		strVariable.Format("Teach Crop Remove Blackline Left Encap Magnus %d Int", k);
-		ptrIniFile->SetInteger(strSec, strVariable, pData->nCrop_RemoveBLLeft_magnus[k]);
-
-
 	}
 
 // cover layer //

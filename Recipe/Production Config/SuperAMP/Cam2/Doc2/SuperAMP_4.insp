@@ -164,16 +164,3 @@ Min Count=1
 Insp Offset=0.000000e+00
 Insp Width=0.000000e+00
 
-[Encap Magnus]
-Enable=1
-Min Thresh=40
-Max Thresh=220
-Crop Expand Width=220
-Crop Expand Height=220
-Dilate Kernel Width=7
-Dilate Kernel Height=7
-Opening Kernel Width=1
-Opening Kernel Height=1
-Crop Smooth=151
-Area Object=999999
-

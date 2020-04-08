@@ -8055,7 +8055,6 @@ void CApplication::InitializeDefectCode()
 	m_nDefectErrorCodesPriorityTemp.Add(-ENCAP_CONTAMINATION);
 	m_nDefectErrorCodesPriorityTemp.Add(-SLOT);
 	m_nDefectErrorCodesPriorityTemp.Add(-DIE_EDGE);
-	m_nDefectErrorCodesPriorityTemp.Add(-ENCAP_MAGNUS);
 	m_nDefectErrorCodesPriorityTemp.Add(UNKNOWN_DEFECT);
 	//m_nDefectErrorCodesPriorityTemp.Add(NOT_INSPECTED);
 	//m_nDefectErrorCodesPriorityTemp.Add(ERROR_PROCESS);
